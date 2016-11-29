@@ -12,4 +12,5 @@ public interface UserOrganizationRoleDAO extends BaseDAO<UserOrganizationRole> {
 
 	Collection<UserOrganizationRole> getByRole(Organization org, Role user);
 	Collection<UserOrganizationRole> get(User user);
+	Collection<UserOrganizationRole> byRole(Role role);
 }

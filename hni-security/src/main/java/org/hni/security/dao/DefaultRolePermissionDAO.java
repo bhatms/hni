@@ -32,4 +32,16 @@ public class DefaultRolePermissionDAO extends AbstractDAO<RolePermission> implem
 			return Collections.emptyList();
 		}
 	}
+
+	@Override
+	public List<RolePermission> byRole(Long roleId) {
+		try {
+			Query q = em.createQuery("SELECT x FROM RolePermission x WHERE x.id.roleId = :roleId")
+						.setParameter("roleId", roleId);
+			return q.getResultList();
+		} catch (NoResultException e) {
+			return Collections.emptyList();
+		}
+	}
+
 }

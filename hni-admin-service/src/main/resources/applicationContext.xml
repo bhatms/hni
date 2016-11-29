@@ -24,10 +24,12 @@
 		<beans profile="production">
 			<!-- this allows injection of values into the dataSource below -->
 			<bean  class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-				<property name="locations" value="classpath:config/application-production.properties" />	
+				<property name="locations" value="classpath:config/production/application.properties" />	
 			</bean>	
-			<util:properties id="hniProperties" location="classpath:config/application-production.properties" />
-
+			<util:properties id="hniProperties" location="classpath:config/production/application.properties" />
+			<bean id="redisLockingService" class=" org.hni.order.service.RedisLockingService">
+				<property name="configLocation" value="/config/production/redis-cache.json" />
+			</bean>
 			<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 			    <property name="poolName" value="springHikariCP" />
 			    <property name="connectionTestQuery" value="${dataSource.connectionTestQuery}" />
@@ -53,7 +55,13 @@
 			  use this if you don't have a database running locally
 		 -->
 		<beans profile="integration">
-			<util:properties id="hniProperties" location="classpath:config/application-integration.properties" />
+			<bean  class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+				<property name="locations" value="classpath:config/integration/application.properties" />	
+			</bean>	
+			<util:properties id="hniProperties" location="classpath:config/integration/application.properties" />
+			<bean id="redisLockingService" class=" org.hni.order.service.RedisLockingService">
+				<property name="configLocation" value="/config/integration/redis-cache.json" />
+			</bean>
 			
 	        <!-- In Memory Database Configuration -->
 	        <jdbc:embedded-database id="dataSource" type="H2">
@@ -66,11 +74,14 @@
 			use this if you have a database running locally for development.
 		-->
 		<beans profile="localdev">
-			<util:properties id="hniProperties" location="classpath:config/application-localdev.properties" />
+			<util:properties id="hniProperties" location="classpath:config/localdev/application.properties" />
+			<bean  class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+				<property name="locations" value="classpath:config/localdev/application.properties" />	
+			</bean>	
 			
 			<!-- this allows injection of values into the dataSource below -->
 			<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-				<property name="locations" value="classpath:config/application-localdev.properties" />	
+				<property name="locations" value="classpath:config/localdev/application.properties" />	
 			</bean>	
 
 			<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
@@ -96,11 +107,14 @@
 		
 		<!--  remote-dev: intended for 'remove server development/testing' -->
 		<beans profile="remotedev">
-			<util:properties id="hniProperties" location="classpath:config/application-remotedev.properties" />
+			<util:properties id="hniProperties" location="classpath:config/remotedev/application.properties" />
+			<bean  class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+				<property name="locations" value="classpath:config/remotedev/application.properties" />	
+			</bean>	
 			
 			<!-- this allows injection of values into the dataSource below -->
 			<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-				<property name="locations" value="classpath:config/application-removedev.properties" />	
+				<property name="locations" value="classpath:config/remotedev/application.properties" />	
 			</bean>	
 
 			<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">

@@ -1,9 +1,7 @@
 package org.hni.provider.om;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import org.hni.common.om.Persistable;
+import org.hni.user.om.Address;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,14 +11,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hni.common.om.Persistable;
-import org.hni.user.om.Address;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents a physical location for a provider generally where
@@ -41,11 +39,11 @@ public class ProviderLocation implements Persistable, Serializable {
 	@Column(name="name") private String name;
 	@Column(name="created") private Date created;
 	@Column(name="created_by") private Long createdById;
-	
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "provider_location_addresses", joinColumns = { @JoinColumn(name = "provider_location_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "address_id", referencedColumnName = "id") })
-	private Set<Address> addresses = new HashSet<Address>();
 
+	@ManyToOne
+	@JoinColumn(name="address_id", referencedColumnName = "id")
+	private Address address;
+	
 	@ManyToOne
 	@JoinColumn(name="provider_id", referencedColumnName = "id")
 	private Provider provider;
@@ -87,12 +85,12 @@ public class ProviderLocation implements Persistable, Serializable {
 		this.createdById = createdById;
 	}
 
-	public Set<Address> getAddresses() {
-		return addresses;
+	public Address getAddress() {
+		return address;
 	}
 
-	public void setAddresses(Set<Address> addresses) {
-		this.addresses = addresses;
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 
 	public void setId(Long id) {

@@ -32,6 +32,7 @@ public class PaymentInstrument implements Serializable, Persistable {
 	
 	@Column(name="card_type") private String cardType;
 	@Column(name="card_number") private String cardNumber;
+	@Column(name="card_serial_id") private String cardSerialId;
 	@Column(name="status") private String status;
 	@Column(name="orginal_balance") private Double originalBalance;
 	@Column(name="balance") private Double balance;
@@ -39,6 +40,9 @@ public class PaymentInstrument implements Serializable, Persistable {
 	@Column(name="pin_number") private String pinNumber;
 	
 	public PaymentInstrument() {}
+	public PaymentInstrument(Long id) {
+		this.id = id;
+	}
 	
 	public Long getId() {
 		return id;
@@ -95,6 +99,12 @@ public class PaymentInstrument implements Serializable, Persistable {
 
 	public void setPinNumber(String pinNumber) {
 		this.pinNumber = pinNumber;
+	}
+	public String getCardSerialId() {
+		return cardSerialId;
+	}
+	public void setCardSerialId(String cardSerialId) {
+		this.cardSerialId = cardSerialId;
 	}
 	
 

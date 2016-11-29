@@ -21,7 +21,7 @@ public class DefaultPaymentInstrumentDAO extends AbstractDAO<PaymentInstrument> 
 	@Override
 	public Collection<PaymentInstrument> with(Provider provider) {
 		try {
-			Query q = em.createQuery("SELECT x FROM PaymentInstrument x WHERE x.provider.id = :providerId AND x.balance > 0 ORDER BY x.lastUsedDatetime ASC")
+			Query q = em.createQuery("SELECT x FROM PaymentInstrument x WHERE x.provider.id = :providerId AND x.balance > 0 AND x.status = 'A' ORDER BY x.lastUsedDatetime ASC")
 				.setParameter("providerId", provider.getId());
 			return q.getResultList();
 		} catch(NoResultException e) {

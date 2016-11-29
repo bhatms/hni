@@ -17,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.util.ThreadContext;
 import org.hni.common.Constants;
 import org.hni.common.exception.HNIException;
@@ -141,6 +142,21 @@ public class UserServiceController {
 	public User getUser() {
 		Long userId = (Long)ThreadContext.get(Constants.USERID); // this was placed onto the context by the JWTTokenAuthenticatingFilter
 		return orgUserService.get(userId);
+	}
+
+	@GET
+	@Path("/organizations")
+	@Produces({MediaType.APPLICATION_JSON})
+	@ApiOperation(value = "Returns the user with the given id"
+	, notes = ""
+	, response = User.class
+	, responseContainer = "")
+	public Collection<User> getUsersByRole(@QueryParam("roleId") Long roleId) {
+		// TODO: MUST add this security layer
+		if (SecurityUtils.getSubject().hasRole("Super User")) {		
+			return orgUserService.byRole(Role.get(roleId));
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 }

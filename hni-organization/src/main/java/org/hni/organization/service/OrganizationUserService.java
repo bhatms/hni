@@ -18,7 +18,7 @@ public interface OrganizationUserService extends UserService {
 	 * @param role
 	 * @return
 	 */
-	User save(User user, Organization org);
+	User save(User user, Organization org, Role role);
 
 	/**
 	 * Removes the user and all their data from the organization. Sets the
@@ -29,8 +29,13 @@ public interface OrganizationUserService extends UserService {
 	 * @return
 	 */
 	void delete(User user, Organization org);
-
 	void delete(User user, Organization org, Role role);
+	
+	/**
+	 * Lock out a user by removing all their roles.
+	 * @param user
+	 */
+	void lock(User user);
 
 	/**
 	 * Archives the user in the given organization. They are still associated
@@ -85,4 +90,11 @@ public interface OrganizationUserService extends UserService {
 	 * @return Collection<UserOrganizationRole>
 	 */
 	Collection<UserOrganizationRole> getUserOrganizationRoles(User user);
+	
+	/**
+	 * Return all users for all orgs with the given role
+	 * @param role
+	 * @return
+	 */
+	Collection<User> byRole(Role role);
 }

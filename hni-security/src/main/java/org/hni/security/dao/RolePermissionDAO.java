@@ -8,4 +8,6 @@ import org.hni.security.om.RolePermission;
 
 public interface RolePermissionDAO extends BaseDAO<RolePermission> {
 	List<Permission> byRoleId(Long roleId);
+
+	List<RolePermission> byRole(Long roleId);
 }

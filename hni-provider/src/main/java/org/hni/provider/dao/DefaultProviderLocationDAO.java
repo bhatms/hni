@@ -31,13 +31,12 @@ public class DefaultProviderLocationDAO extends AbstractDAO<ProviderLocation> im
 	}
 
 	@Override
-	public Collection<ProviderLocation> providersNearCustomer(Long custId, Address addr, int itemsPerPage, int pageNumber) {
+	public Collection<ProviderLocation> providersNearCustomer(Address addr, int itemsPerPage) {
 		try {
 
 			String queryString = new StringBuilder()
-					.append("SELECT pl.* FROM provider_locations pl,provider_location_addresses plad ")
-					.append(" where pl.id = plad.provider_location_id ")
-					.append(" and plad.address_id in ")
+					.append("SELECT pl.* FROM provider_locations pl ")
+					.append(" WHERE pl.address_id in ")
 					.append(" ( select new_addr.id from ")
 					.append(" ( SELECT adr.id, ")
 					.append(" ( 6371 * acos( ")

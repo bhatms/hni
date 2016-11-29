@@ -20,7 +20,10 @@
 
 		<bean id="pageTimerFilter" class="org.hni.admin.filter.PageTimerFilter"/>
 		<bean id="optionsFilter" class="org.hni.admin.filter.OptionsFilter"/>
-		<bean id="jwtAuthc" class="org.hni.admin.filter.JWTTokenAuthenticatingFilter"/>
+		<bean id="jwtAuthc" class="org.hni.admin.filter.JWTTokenAuthenticatingFilter">
+			<property name="tokenIssuer" value="${token.issuer}"/>
+			<property name="tokenKey" value="${token.key}"/>
+		</bean>
 		
         <bean id="springFilters" class="org.springframework.web.filter.CompositeFilter">
                 <property name="filters">
@@ -45,7 +48,8 @@
                         		/api/v1/security/authentication = anon
                         		/api/v1/security/google/authentication = anon
                                 /api/v1/security/loginrequired = anon    
-                                /api/v1/swagger.json = anon                       
+                                /api/v1/swagger.json = anon            
+                                /api/v1/usermessage = anon           
                                 /api/v1/** = jwtAuthc <!--  ssl, noSessionCreation,  ALL other urls to require a valid token -->
                                 /** = anon  <!-- open access to non-service things -->
                         </value>

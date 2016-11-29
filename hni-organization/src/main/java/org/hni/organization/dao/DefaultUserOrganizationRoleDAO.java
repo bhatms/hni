@@ -47,4 +47,15 @@ public class DefaultUserOrganizationRoleDAO extends AbstractDAO<UserOrganization
 		}
 	}
 
+	@Override
+	public Collection<UserOrganizationRole> byRole(Role role) {
+		try {
+			Query q = em.createQuery("SELECT x FROM UserOrganizationRole x WHERE x.id.roleId = :roleId")
+				.setParameter("roleId", role.getId());
+			return q.getResultList();
+		} catch(NoResultException e) {
+			return Collections.emptyList();
+		}
+	}
+
 }

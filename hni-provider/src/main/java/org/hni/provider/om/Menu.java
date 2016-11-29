@@ -1,8 +1,6 @@
 package org.hni.provider.om;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import org.hni.common.om.Persistable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,7 +14,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hni.common.om.Persistable;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 /**
  * Maps the name of a menu and when the menu is applicable
  * during the day.  Hours should be represented in 24hr format.

@@ -1,7 +1,6 @@
 package org.hni.security.service;
 
-import javax.inject.Inject;
-
+import org.apache.commons.codec.binary.Base64;
 import org.hni.common.service.AbstractService;
 import org.hni.security.dao.ActivationCodeDAO;
 import org.hni.security.om.ActivationCode;
@@ -10,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Inject;
 
 @Component
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -28,23 +29,38 @@ public class DefaultActivationCodeService extends AbstractService<ActivationCode
 	}
 
 	@Override
-	public boolean validate(String id) {
-		ActivationCode code = activationCodeDao.get(id);
-		return (code == null);
+	public boolean validate(String authCode) {
+
+		ActivationCode code = getByActivationCode(authCode);
+		return code != null
+			&& code.getUser() == null
+            && code.getOrganizationId() != null
+			&& code.isEnabled()
+			&& code.getMealsRemaining() > 0
+			&& code.getMealsAuthorized() > 0;
 	}
-	
+
 	@Override
-	public String encode(Long authCode)
-	{   long encodedCode;
-		encodedCode=(305914*(authCode-LARGE_BASE)+OFFSET) % LARGE_PRIME; 
-		return String.format("%06d", encodedCode);
+    public ActivationCode getByActivationCode(String authCode) {
+        return activationCodeDao.getByActivationCode(authCode);
+    }
+
+    /**
+     * WARNING This implementation WILL NOT work with JPA generated Ids. This method was implemented
+     * with the assumption that authCodes are already available, and decoded values of authCodes will be
+     * inserted to the database manually
+     * @param authCodeId
+     * @return
+     */
+	public Long encode(String authCodeId) {
+        byte[] authCodeIdBytes = authCodeId.getBytes();
+        String authCodeStr = new String(Base64.decodeBase64(authCodeIdBytes));
+        return Long.valueOf(authCodeStr);
 	}
-	
-	@Override
-	public Long decode(Long authCode )
-	{   
-		return (605673*(authCode -OFFSET)+LARGE_BASE) % LARGE_PRIME ;
- 		
+
+	public String decode(Long authCode) {
+        byte[] authCodeStr = String.valueOf(authCode).getBytes();
+        return new String(Base64.encodeBase64(authCodeStr));
 	}
 
 }

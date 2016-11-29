@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 
 import org.apache.log4j.BasicConfigurator;
+import org.hni.common.om.Role;
 import org.hni.organization.om.Organization;
 import org.hni.user.om.User;
 import org.hni.user.om.type.Gender;
@@ -35,8 +36,8 @@ public class TestOrganizationUserService {
 		orgUserService.save(user);
 
 		Organization org = organizationService.get(2L);
-		
-		orgUserService.save(user, org);
+		Role role = Role.get(5L);
+		orgUserService.save(user, org,role);
 		
 		Collection<User> users = orgUserService.getAllUsers(org); // the USER role
 		assertEquals(3, users.size());

@@ -47,41 +47,13 @@ public class TestUserTokenService extends TestCase {
 		assertTrue(claims.containsKey("userId"));
 	}
 
-	@Test
-	public void testPermissionsFromClaim() {
-		Claims claims = userTokenService.getClaimsFromToken(TOKEN);
 
-		Set<OrganizationUserRolePermission> orgPermissions = userTokenService.getPermissionsFromClaims(claims);
-		boolean orgPermissionFound = false;
-		for (OrganizationUserRolePermission orgPermission : orgPermissions) {
-			orgPermissionFound = true;
-			assertTrue(orgPermission.getOrganizationId().equals(2L));
-			assertTrue(orgPermission.getUserId().equals(1L));
-			assertTrue(orgPermission.getRoleId().equals(1L));
-			assertTrue(1 == orgPermission.getPermissions().size());
-			boolean permissionFound = false;
-			for (Permission permission : orgPermission.getPermissions()) {
-				permissionFound = true;
-				Permission retrievedPermission = getPermission();
-				assertEquals(retrievedPermission, permission);
-			}
-			assertTrue(permissionFound);
-		}
-		assertTrue(orgPermissionFound);
-	}
 
 	@Test
 	public void testUserIdFromClaims() {
 		Claims claims = userTokenService.getClaimsFromToken(TOKEN);
 		Long userId = userTokenService.getUserIdFromClaims(claims);
 		assertTrue(userId.equals(1L));
-	}
-
-	@Test
-	public void testOrgIdFromClaims() {
-		Claims claims = userTokenService.getClaimsFromToken(TOKEN);
-		Long organizationId = userTokenService.getOrganizationIdFromClaims(claims);
-		assertTrue(organizationId.equals(2L));
 	}
 
 	@Test

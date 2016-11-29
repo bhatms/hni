@@ -1,20 +1,23 @@
 package org.hni.order.dao;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+
 import org.hni.common.DateUtils;
 import org.hni.common.dao.AbstractDAO;
 import org.hni.order.om.Order;
+import org.hni.order.om.type.OrderStatus;
+import org.hni.provider.om.Provider;
 import org.hni.provider.om.ProviderLocation;
 import org.hni.user.om.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 
 @Component
 public class DefaultOrderDAO extends AbstractDAO<Order> implements OrderDAO {
@@ -38,12 +41,10 @@ public class DefaultOrderDAO extends AbstractDAO<Order> implements OrderDAO {
 	}
 
 	@Override
-	public Collection<Order> get(ProviderLocation providerLocation, LocalDateTime fromDate, LocalDateTime toDate) {
+	public Collection<Order> get(Provider provider, LocalDateTime fromDate, LocalDateTime toDate) {
 		try {
-			Query q = em.createQuery("SELECT x FROM Order x "
-					+ "WHERE x.orderDate BETWEEN :fromDate AND :toDate "
-					+ "AND x.providerLocation = :providerLocationId ")
-					.setParameter("providerLocationId", providerLocation)
+			Query q = em.createQuery("SELECT x FROM Order x WHERE x.orderDate BETWEEN :fromDate AND :toDate AND x.providerLocation.provider.id = :providerId ")
+					.setParameter("providerId", provider.getId())
 					.setParameter("fromDate", DateUtils.asDate(fromDate))
 					.setParameter("toDate", DateUtils.asDate(toDate));
 			return q.getResultList();
@@ -51,5 +52,28 @@ public class DefaultOrderDAO extends AbstractDAO<Order> implements OrderDAO {
 			return Collections.emptyList();
 		}
 	}
+	
+	@Override
+	public Collection<Order> with(OrderStatus orderStatus) {
+		try {
+			Query q = em.createQuery("SELECT x FROM Order x WHERE x.statusId = :statusId")
+					.setParameter("statusId", orderStatus.getId());
+			return q.getResultList();
+		} catch (NoResultException e) {
+			return Collections.emptyList();
+		}
+	}
 
+	@Override
+	public Collection<Order> with(Provider provider, OrderStatus orderStatus) {
+		try {
+			Query q = em.createQuery("SELECT x FROM Order x WHERE x.providerLocation.provider.id = :providerId AND x.statusId = :statusId")
+					.setParameter("providerId", provider.getId())
+					.setParameter("statusId", orderStatus.getId());
+			return q.getResultList();
+		} catch (NoResultException e) {
+			return Collections.emptyList();
+		}
+	}
+	
 }

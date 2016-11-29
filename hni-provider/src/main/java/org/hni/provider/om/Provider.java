@@ -1,10 +1,7 @@
 package org.hni.provider.om;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.hni.common.om.Persistable;
+import org.hni.user.om.Address;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,12 +11,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hni.common.om.Persistable;
-import org.hni.user.om.Address;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A Provider is an entity that provides meals to clients.  There will be
@@ -39,12 +38,16 @@ public class Provider implements Serializable, Persistable {
 	private Long id;
 	
 	@Column(name="name") private String name;
+	@Column(name="website_url") private String websiteUrl;
 	@Column(name="created") private Date created;
 	@Column(name="created_by") private Long createdById;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "provider_addresses", joinColumns = { @JoinColumn(name = "provider_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "address_id", referencedColumnName = "id") })
-	private Set<Address> addresses = new HashSet<Address>();
+	@ManyToOne
+	@JoinColumn(name="address_id", referencedColumnName = "id")
+	private Address address;
+
+	@OneToMany(fetch= FetchType.EAGER, mappedBy="provider", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	private Set<Menu> menus = new HashSet<>();
 
 	public Provider() {}
 	public Provider(Long id) {
@@ -80,16 +83,30 @@ public class Provider implements Serializable, Persistable {
 		this.createdById = createdById;
 	}
 
-	public Set<Address> getAddresses() {
-		return addresses;
+	public Address getAddress() {
+		return address;
 	}
 
-	public void setAddresses(Set<Address> addresses) {
-		this.addresses = addresses;
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	public String getWebsiteUrl() {
+		return websiteUrl;
+	}
+	public void setWebsiteUrl(String websiteUrl) {
+		this.websiteUrl = websiteUrl;
+	}
+
+	public Set<Menu> getMenus() {
+		return menus;
+	}
+
+	public void setMenus(Set<Menu> menu) {
+		this.menus = menu;
 	}
 
 	

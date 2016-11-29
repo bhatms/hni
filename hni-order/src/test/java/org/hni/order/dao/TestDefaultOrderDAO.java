@@ -1,7 +1,15 @@
 package org.hni.order.dao;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.hni.order.om.Order;
 import org.hni.order.service.OrderTestData;
+import org.hni.provider.om.Provider;
 import org.hni.provider.om.ProviderLocation;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,12 +17,6 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Inject;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Verifies that the dao is making successful queries
@@ -38,7 +40,7 @@ public class TestDefaultOrderDAO {
             orderDao.save(OrderTestData.getTestOrder(now.minus(i, ChronoUnit.MINUTES), new ProviderLocation(3L)));
         }
 
-        List<Order> orders = (ArrayList<Order>) orderDao.get(new ProviderLocation(2L), LocalDateTime.now().minus(1, ChronoUnit.DAYS), LocalDateTime.now());
+        List<Order> orders = (ArrayList<Order>) orderDao.get(new Provider(2L), LocalDateTime.now().minus(1, ChronoUnit.DAYS), LocalDateTime.now());
 
         //Verifies that the correct list of orders was returned
         Assert.assertEquals(5, orders.size());
@@ -47,7 +49,7 @@ public class TestDefaultOrderDAO {
         }
 
         //Verifies that orders were not returned when search parameters were bad
-        orders = (ArrayList<Order>) orderDao.get(new ProviderLocation(9L), LocalDateTime.now().minus(1, ChronoUnit.DAYS), LocalDateTime.now());
+        orders = (ArrayList<Order>) orderDao.get(new Provider(9L), LocalDateTime.now().minus(1, ChronoUnit.DAYS), LocalDateTime.now());
         Assert.assertEquals(0, orders.size());
     }
 

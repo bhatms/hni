@@ -1,7 +1,8 @@
 package org.hni.user.om;
 
-import java.io.Serializable;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hni.common.om.Persistable;
+import org.hni.user.om.type.Gender;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,11 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.hni.common.om.Persistable;
-import org.hni.user.om.type.Gender;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Represents any user defined in the system. Users can play several different

@@ -1,11 +1,12 @@
 package org.hni.security.service;
 
-import io.jsonwebtoken.Claims;
-
 import java.util.Set;
 
 import org.hni.security.om.OrganizationUserRolePermission;
+import org.hni.security.om.UserAccessControls;
 import org.hni.user.om.User;
+
+import io.jsonwebtoken.Claims;
 
 public interface UserTokenService {
 	public static final String TOKEN_HEADER = "x-hni-token";
@@ -24,20 +25,16 @@ public interface UserTokenService {
 	 */
 	Long getUserIdFromClaims(Claims claims);
 
-	/**
-	 * retrieve organization id from claims
-	 */
-	Long getOrganizationIdFromClaims(Claims claims);
 
 	/**
 	 * retrieve permissions from claims
 	 */
-	Set<OrganizationUserRolePermission> getPermissionsFromClaims(Claims claims);
+	UserAccessControls getPermissionsFromClaims(Claims claims);
 
 	/**
 	 * retrieve permissions from token
 	 */
-	Set<OrganizationUserRolePermission> getPermissionsFromToken(String token);
+	UserAccessControls getPermissionsFromToken(String token);
 
 	/**
 	 * retrieve permissions based on user and organization id

@@ -32,6 +32,7 @@ public class TestProviderService {
 		assertNotNull(provider);
 	}
 	
+	/*
 	@Test
 	public void testAddAddress() {
 		Provider provider = providerService.get(1L);
@@ -46,4 +47,5 @@ public class TestProviderService {
 		assertEquals(1, provider.getAddresses().size());
 		
 	}
+	*/
 }

@@ -31,4 +31,11 @@ public class DateUtils {
 		LocalDate theDate = LocalDate.parse(inputString, formatter);
 		return theDate;
 	}
+	
+	public static LocalDateTime parseDateTime(String inputString) {
+		DateTimeFormatter formatter = DateTimeFormatter
+				.ofPattern("" + "[yyyy-MM-dd HH:mm:ss]" + "[yyyy/MM/dd HH:mm:ss]" + "[MM-dd-yyyy HH:mm:ss]" + "[MM/dd/yyyy HH:mm:ss]");
+		LocalDateTime theDate = LocalDateTime.parse(inputString, formatter);
+		return theDate;
+	}
 }

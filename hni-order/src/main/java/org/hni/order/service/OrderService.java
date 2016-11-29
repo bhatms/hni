@@ -1,14 +1,11 @@
 package org.hni.order.service;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import org.hni.common.service.BaseService;
 import org.hni.order.om.Order;
-import org.hni.provider.om.ProviderLocation;
+import org.hni.provider.om.Provider;
 import org.hni.user.om.User;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
 
 public interface OrderService extends BaseService<Order> {
 
@@ -28,37 +25,15 @@ public interface OrderService extends BaseService<Order> {
 	 * @return
 	 */
 	Collection<Order> get(User user, LocalDate startDate, LocalDate endDate);
-	
-	/**
-	 * Locks an order.  This is to prevent the system from giving the same order to another
-	 * person to process.
-	 * @param order
-	 * @return
-	 */
-	Order lock(Order order);
-	
-	/**
-	 * Releases the lock on an order.
-	 * @param order
-	 * @return
-	 */
-	Order release(Order order);
-	
-	/**
-	 * Gets the next available order to process for a particular provider
-	 * where the order was created on a date.
-	 * @param providerLocation
-	 * @param orderDate
-	 * @return
-	 */
-	Order next(ProviderLocation providerLocation, LocalDateTime orderDate);
-	
+		
 	/**
 	 * Returns the next available order for a provider
+	 * Locks an order.  This is to prevent the system from giving the same order to another
 	 * @param providerLocation
 	 * @return
 	 */
-	Order next(ProviderLocation providerLocation);
+	Order next();
+	Order next(Provider provider);
 	
 	/**
 	 * Sets an order to completed.
@@ -66,4 +41,25 @@ public interface OrderService extends BaseService<Order> {
 	 * @return
 	 */
 	Order complete(Order order);
+	
+	/**
+	 * Forcibly unlock an order.
+	 * @param order
+	 */
+	Order releaseLock(Order order);
+	
+	/**
+	 * Returns a count of open orders
+	 * @return
+	 */
+	long countOrders();
+	
+	/**
+	 * Returns a count of open orders for a provider
+	 * @param provider
+	 * @return
+	 */
+	long countOrders(Provider provider);
+
+	Order reset(Order order);
 }

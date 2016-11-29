@@ -3,19 +3,14 @@ package org.hni.provider.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.http.client.fluent.Request;
-import org.hni.provider.om.ProviderLocation;
 import org.hni.user.om.Address;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.List;
 import java.util.Optional;
 
-/**
- * Created by walmart on 11/14/16.
- */
 @Service
 public class DefaultGeoCodingService implements GeoCodingService {
 

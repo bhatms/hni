@@ -11,6 +11,6 @@ public interface ProviderLocationDAO extends BaseDAO<ProviderLocation> {
 
 	Collection<ProviderLocation> with(Provider provider);
 
-	Collection<ProviderLocation> providersNearCustomer(Long custId, Address addr, int itemsPerPage, int pageNumber);
+	Collection<ProviderLocation> providersNearCustomer(Address addr, int itemsPerPage);
 
 }

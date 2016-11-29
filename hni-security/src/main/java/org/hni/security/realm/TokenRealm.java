@@ -20,6 +20,7 @@ import org.apache.shiro.util.ThreadContext;
 import org.hni.common.Constants;
 import org.hni.security.om.OrganizationUserRolePermission;
 import org.hni.security.om.Permission;
+import org.hni.security.om.UserAccessControls;
 import org.hni.security.realm.token.JWTAuthenticationToken;
 import org.hni.user.om.User;
 import org.slf4j.Logger;
@@ -67,13 +68,28 @@ public class TokenRealm extends PasswordRealm {
 		}
 		SimpleAuthorizationInfo authInfo = new SimpleAuthorizationInfo();
 		String permissions = (String) ThreadContext.get(Constants.PERMISSIONS);
-		Set<OrganizationUserRolePermission> permissionSet = deserializePermissions(permissions);
-		for (OrganizationUserRolePermission orgUserRolePermission : permissionSet) {
+		//Set<OrganizationUserRolePermission> permissionSet = deserializePermissions(permissions);
+		UserAccessControls acl;
+		try {
+			acl = objectMapper.readValue(permissions, UserAccessControls.class);
+			authInfo.addStringPermissions(acl.getPermissions());
+			authInfo.addRoles(acl.getRoles());
+			for(String v : acl.getRoles()) {
+				logger.info("ROLE:"+v);
+			}
+			for(String p : acl.getPermissions()) {
+				logger.info("PERM:"+p);
+			}
+		} catch (IOException e) {
+			logger.warn("unable to deserialize token permissions..setting to nothing");
+		}
+		
+		/*for (OrganizationUserRolePermission orgUserRolePermission : permissionSet) {
 			authInfo.addRole(String.valueOf(orgUserRolePermission.getRoleId()));
 			for (Permission permission : orgUserRolePermission.getPermissions()) {
 				authInfo.addStringPermission(permission.toString());
 			}
-		}
+		}*/
 		return authInfo;
 	}
 

@@ -1,10 +1,7 @@
 package org.hni.security.service;
 
-import io.jsonwebtoken.Claims;
-
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,20 +12,23 @@ import org.hni.organization.om.UserOrganizationRole;
 import org.hni.organization.service.OrganizationUserService;
 import org.hni.security.om.OrganizationUserRolePermission;
 import org.hni.security.om.Permission;
+import org.hni.security.om.UserAccessControls;
 import org.hni.security.realm.token.JWTTokenFactory;
 import org.hni.user.om.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jsonwebtoken.Claims;
 
 @Component
 public class DefaultUserTokenService implements UserTokenService {
-
-	@Inject
-	private OrganizationUserService orgUserService;
-	@Inject
-	private RolePermissionService rolePermissionService;
+	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTokenService.class);
+	
+	@Inject	private OrganizationUserService orgUserService;
+	@Inject	private RolePermissionService rolePermissionService;
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -41,30 +41,18 @@ public class DefaultUserTokenService implements UserTokenService {
 		return userId;
 	}
 
-	public Long getOrganizationIdFromClaims(Claims claims) {
-		Long orgId = 0L;
-		Set<OrganizationUserRolePermission> permissions = getPermissionsFromClaims(claims);
-		for (OrganizationUserRolePermission permission : permissions) {
-			orgId = permission.getOrganizationId();
-			break;
-		}
-		return orgId;
-	}
-
-	public Set<OrganizationUserRolePermission> getPermissionsFromClaims(Claims claims) {
-		Set<OrganizationUserRolePermission> permissions = new TreeSet<OrganizationUserRolePermission>();
+	public UserAccessControls getPermissionsFromClaims(Claims claims) {
+		  
+		
 		String permissionsString = claims.get(Constants.PERMISSIONS, String.class);
+		UserAccessControls acl;
 		try {
-			List<OrganizationUserRolePermission> orgPermission = objectMapper.readValue(permissionsString,
-					new TypeReference<List<OrganizationUserRolePermission>>() {
-					});
-			for (OrganizationUserRolePermission permission : orgPermission) {
-				permissions.add(permission);
-			}
+			acl = objectMapper.readValue(permissionsString, UserAccessControls.class);
+			return acl;
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn("Unable to desesrialize access controls from Token...return blank ACL");
+			return new UserAccessControls();
 		}
-		return permissions;
 	}
 
 	public Set<OrganizationUserRolePermission> getUserOrganizationRolePermissions(User user, Long organizationId) {
@@ -90,7 +78,7 @@ public class DefaultUserTokenService implements UserTokenService {
 	}
 
 	@Override
-	public Set<OrganizationUserRolePermission> getPermissionsFromToken(String token) {
+	public UserAccessControls getPermissionsFromToken(String token) {
 		Claims claims = getClaimsFromToken(token);
 		return getPermissionsFromClaims(claims);
 	}

@@ -1,9 +1,7 @@
 package org.hni.provider.service;
 
-import org.hni.provider.om.ProviderLocation;
 import org.hni.user.om.Address;
 
-import java.util.List;
 import java.util.Optional;
 
 /**

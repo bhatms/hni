@@ -6,6 +6,28 @@ SET MODE MySQL;
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
+-- Table `event_state`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `event_state` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `eventname` VARCHAR(255) NOT NULL,
+  `phoneno` VARCHAR(45) NOT NULL UNIQUE,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `registration_state`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registration_state` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `eventname` VARCHAR(255) NOT NULL,
+  `phoneno` VARCHAR(45) NOT NULL,
+  `payload` VARCHAR(255) NULL,
+  `eventstate` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
 -- Table `users`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `users` (
@@ -66,6 +88,9 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `providers` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NULL,
+  `address_id` INT NULL,
+  `menu_id` INT NOT NULL,
+  `website_url` VARCHAR(255) NULL,
   `created` DATETIME NOT NULL,
   `created_by` INT NOT NULL,
   PRIMARY KEY (`id`))
@@ -79,7 +104,8 @@ CREATE TABLE IF NOT EXISTS `provider_locations` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NULL,
   `provider_id` INT NOT NULL,
-  `created` VARCHAR(45) NOT NULL,
+  `address_id` INT NULL,
+  `created` DATETIME NOT NULL,
   `created_by` INT NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -98,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `subtotal` DECIMAL(10,2) NULL,
   `tax` DECIMAL(10,2) NULL,
   `created_by` INT NULL COMMENT 'surrogate to users',
+  `status_id` INT NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -164,15 +191,17 @@ ENGINE = InnoDB;
 -- Table `activation_codes`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `activation_codes` (
-  `activation_code` VARCHAR(255) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `activation_code` VARCHAR(128) NOT NULL,
   `organization_id` INT NOT NULL,
   `meals_authorized` INT NULL,
   `meals_remaining` INT NULL,
-  `activated` TINYINT NULL COMMENT 'true/false whether this voucher can be used',
+  `enabled` TINYINT NULL COMMENT 'true/false whether this voucher can be used',
   `comments` VARCHAR(255) NULL,
   `created` VARCHAR(45) NULL,
   `user_id` INT NULL COMMENT 'the user who “owns” this voucher',
-  PRIMARY KEY (`activation_code`))
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_activation_code` (`activation_code`))
 ENGINE = InnoDB;
 
 
@@ -186,25 +215,6 @@ CREATE TABLE IF NOT EXISTS `user_provider_role` (
   PRIMARY KEY (`user_id`, `provider_id`, `role_id`))
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `provider_addresses`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `provider_addresses` (
-  `provider_id` INT NOT NULL,
-  `address_id` INT NOT NULL,
-  PRIMARY KEY (`provider_id`, `address_id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `provider_location_addresses`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `provider_location_addresses` (
-  `provider_location_id` INT NOT NULL,
-  `address_id` INT NOT NULL,
-  PRIMARY KEY (`provider_location_id`, `address_id`))
-ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -257,8 +267,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `payment_instruments` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `providers_id` INT NULL,
+  `provider_id` INT NULL,
   `card_type` VARCHAR(45) NULL,
+  `card_serial_id` VARCHAR(255) NULL,  
   `card_number` VARCHAR(45) NULL COMMENT 'hashed value',
   `status` VARCHAR(45) NULL COMMENT 'activated or not',
   `orginal_balance` DECIMAL(10,2) NULL,
@@ -279,5 +290,47 @@ CREATE TABLE IF NOT EXISTS `order_payments` (
   `created_by` INT NOT NULL,
   `created_date` DATETIME NOT NULL,
   PRIMARY KEY (`order_id`, `payment_instrument_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `partial_orders`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `partial_orders` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NULL,
+  `provider_location_id` INT NULL,
+  `menu_item_id` INT NULL,
+  `order_item_id` INT NULL,
+  `chosen_provider_id` INT NULL,
+  `transaction_phase` VARCHAR(45) NULL,
+  `address` VARCHAR(160) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `partial_orders_menu_items`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `partial_orders_menu_items` (
+  `id` INT NOT NULL,
+  `menu_item_id` INT NOT NULL)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `partial_orders_provider_locations`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `partial_orders_provider_locations` (
+  `id` INT NOT NULL,
+  `provider_location_id` INT NOT NULL)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `partial_orders_order_items`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `partial_orders_order_items` (
+  `id` INT NOT NULL,
+  `order_item_id` INT NOT NULL)
 ENGINE = InnoDB;
 

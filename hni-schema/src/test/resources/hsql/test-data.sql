@@ -1,14 +1,21 @@
+SET MODE MySQL;
+
+truncate table users;
 insert into users values(1,'Super','User','M','mphone', 'superuser@hni.com', 0, 'qqIDI/cPs/CqdMo15uDhwAN/Zc+Z9VOUjLNGgxlC864=', '42M7kr4oektqA6Jgy9u1YQ==', now(), '0');
 insert into users values(2,'Freddy','Fikes','M','479-555-1212', '', 0, '', '', now(), '0');
 insert into users values(3,'Mikey','Multiphone','M','479-555-4321', '', 0, '', '', now(), '0');
 insert into users values(4,'Mikey','Multiphone','M','479-555-5678', '', 0, '', '', now(), '0');
 insert into users values(5, 'Ericka', 'Energy', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
 insert into users values(6, 'Barbara', 'Bollingsworth', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
+insert into users values(7, 'VOLUNTEER1', 'voliunteer', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
+insert into users values(8, 'VOLUNTEER2', 'voliunteer', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
 
+truncate table organizations;
 insert into organizations values(1, 'Not Impossible', 'phone', 'website', 'logo', now(), 1);
 insert into organizations values(2, 'Samaritan House', 'phone', 'website', 'logo', now(), 1);
 insert into organizations values(3, 'Volunteer Organization', 'phone', 'website', 'logo', now(), 1);
 
+truncate table user_organization_role;
 insert into user_organization_role values(1, 2, 1);
 insert into user_organization_role values(2, 2, 7);
 insert into user_organization_role values(3, 2, 7);
@@ -21,23 +28,30 @@ insert into user_organization_role values(6, 4, 5);
 insert into user_organization_role values(6, 4, 2);
 insert into user_organization_role values(6, 2, 5);
 insert into user_organization_role values(6, 2, 2);
+insert into user_organization_role values(7, 3, 3);
+insert into user_organization_role values(8, 3, 3);
 
-insert into providers values(1, 'Subway', now(), 1);
-insert into provider_locations values(1, 'Subway #1', 1, now(), 1);
+truncate table menus;
+truncate table menu_items;
 insert into menus values(1, '"Subway Lunch', 1, 10, 16); /* 10am to 4pm */
 insert into menu_items values(1, 1, 'Ham Sandwich', 'ham and cheese with LTP', 6.99, null);
 insert into menu_items values(2, 1, 'Turkey Sandwich', 'turkey and cheese with LTP', 7.99, null);
 insert into menu_items values(3, 1, 'Roast beef Sandwich', 'beef and cheese with LTP', 8.99, null);
 insert into menu_items values(4, 1, 'Club Sandwich', 'turkey, ham and cheese with LTP', 7.95, null);
 
-insert into orders values(1, 2, 1, dateadd('DAY', -2, current_date), dateadd('DAY', -2, current_date), null, 9.95, 1.20, 1);
+truncate table orders;
+insert into orders values(1, 2, 1, now(), now(), null, 9.95, 1.20, 1, 1);
+insert into orders values(2, 2, 1, now(), now(), null, 9.95, 1.20, 1, 1);
+insert into orders values(3, 2, 1, now(), now(), null, 9.95, 1.20, 1, 1);
 
+truncate table security_roles;
 insert into security_roles values(1,'Super User');
 insert into security_roles values(2,'Administrator');
 insert into security_roles values(3,'Volunteer');
 insert into security_roles values(4,'Client');
 insert into security_roles values(5,'User');
 
+truncate table security_permissions;
 insert into security_permissions values(1,'*','*'); /* user-user only! */
 
 insert into security_permissions values(11,'organizations','create');
@@ -73,6 +87,7 @@ insert into security_permissions values(84,'activation-codes','delete');
 insert into security_permissions values(85,'activation-codes','*');
 
 /* super-user / admin */
+truncate table security_role_permissions;
 insert into security_role_permissions values(1,1,1);
 insert into security_role_permissions values(2,15,0);
 insert into security_role_permissions values(2,25,1);
@@ -88,24 +103,37 @@ insert into security_role_permissions values(3,67,1);
 insert into security_role_permissions values(4,12,0);
 insert into security_role_permissions values(5,12,0);
 
-insert into activation_codes values('1234567890', 2, 10, 10, 1, null, now(), null);
-insert into activation_codes values('7h-1234567890', 2, 10, 10, 2, 'freddy has activated this', now(), 2);
+truncate table activation_codes;
+insert into activation_codes values(1, '1234567890', 2, 10, 10, 1, null, now(), null);
+insert into activation_codes values(2, '7h-1234567890', 2, 10, 10, 1, 'freddy has activated this', now(), 2);
+insert into activation_codes values(3, '123456', 2, 10, 10, 1, null, now(), null);
+insert into activation_codes values(4, '987654', 2, 10, 10, 0, null, now(), null);
 
-insert into providers values(2, 'KFC', now(), 1);
-insert into providers values(3, 'Wendys', now(), 1);
+truncate table addresses;
+insert into addresses values (1, 'subway corp addr', '1251 Phoenician way', '', 'columbus','oh','43240', '-82.98402279999999', '40.138686','etc');
+insert into addresses values (2, 'kfc corp addr', '10790 parkridge blvd', '', 'reston','va','20191', '-77.316008', '38.9455603','etc');
+insert into addresses values (3, 'wendys corp addr', '1251 Phoenician way', '', 'columbus','oh','43240', '-82.98402279999999', '40.138686','etc');
+insert into addresses values (4, 'subway #1 addr', '10790 parkridge blvd', '', 'columbus','oh','43240', '-82.98402279999999', '40.138686','etc');
+insert into addresses values (5, 'kfc #1 addr', '1251 Phoenician way', '', 'reston','va','20191', '-77.316008', '38.9455603','etc');
+insert into addresses values (6, 'wendys #1 addr', '1251 Phoenician way', '', 'columbus','oh','43240', '-82.98402279999999', '40.138686','etc');
 
-insert into provider_locations values(2, 'KFC #1', 1, now(), 1);
-insert into provider_locations values(3, 'Wendy #1', 1, now(), 1);
+truncate table providers;
+insert into providers values(1, 'Subway', 1, 1, 'http://www.subway.com', now(), 1);
+insert into providers values(2, 'KFC', 2, 1, 'http://www.kfc.com', now(), 1);
+insert into providers values(3, 'Wendys', 3, 1, 'http://www.wendys.com', now(), 1);
 
-insert into addresses values
-(1, 'subway addr', '1251 Phoenician way', '', 'columbus','oh','43240', '-82.98402279999999', '40.138686','etc');
+truncate table provider_locations;
+insert into provider_locations values(1, 'Subway #1', 1, 4, now(), 1);
+insert into provider_locations values(2, 'KFC #1', 2, 5, now(), 1);
+insert into provider_locations values(3, 'Wendy #1', 3, 6, now(), 1);
 
-
-insert into addresses values
-(2, 'subway addr', '10790 parkridge blvd', '', 'reston','va','20191', '-77.316008', '38.9455603','etc');
-
-
-insert into provider_location_addresses values(1, 1);
-insert into provider_location_addresses values(1, 2);
-insert into provider_location_addresses values(2, 2);
-insert into provider_location_addresses values(3, 2);
+insert into payment_instruments values(1, 1, 'gift', '1', '1000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(2, 1, 'gift', '2', '2000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(3, 1, 'gift', '3', '3000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(4, 1, 'gift', '4', '4000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(5, 1, 'gift', '5', '5000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(6, 1, 'gift', '6', '6000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(7, 1, 'gift', '7', '7000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(8, 1, 'gift', '8', '8000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(9, 1, 'gift', '9', '9000-0000-0000-0001','A', 10, 10, null, '1234');
+insert into payment_instruments values(10, 1, 'gift', '10', '1100-0000-0000-0001','A', 10, 10, null, '1234');

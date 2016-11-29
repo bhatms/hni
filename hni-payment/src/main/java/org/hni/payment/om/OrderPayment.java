@@ -3,18 +3,16 @@ package org.hni.payment.om;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hni.common.om.Persistable;
-import org.hni.provider.om.Provider;
+import org.hni.order.om.Order;
+import org.hni.user.om.User;
 
 @Entity
 @Table(name = "order_payments")
@@ -25,17 +23,20 @@ public class OrderPayment implements Serializable, Persistable {
 	@EmbeddedId private OrderPaymentPK id;
 
 	@Column(name="amount") private Double amount;
-	@Column(name="created_by_id") private Long createdById;
-	@Column(name="created_datetime") private Date createdDatetime;
+	@Column(name="created_by") private Long createdById;
+	@Column(name="created_date") private Date createdDatetime;
 	
 	public OrderPayment() {}
-	public OrderPayment(OrderPaymentPK id, Double amount, Long createdbyId, Date createdDatetime) {
+	public OrderPayment(OrderPaymentPK id, Double amount, Long createdById, Date createdDatetime) {
 		this.id = id;
 		this.amount = amount;
-		this.createdById = createdbyId;
+		this.createdById = createdById;
 		this.createdDatetime = createdDatetime;
 	}
 
+	public OrderPayment(Order order, PaymentInstrument paymentInstrument, Double amount, User user) {
+		this(new OrderPaymentPK(order, paymentInstrument), amount, user.getId(), new Date());
+	}
 	public OrderPaymentPK getId() {
 		return id;
 	}

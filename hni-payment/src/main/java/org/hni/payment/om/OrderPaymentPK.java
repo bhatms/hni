@@ -2,41 +2,59 @@ package org.hni.payment.om;
 
 import java.io.Serializable;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import org.hni.order.om.Order;
 
 @Embeddable
 public class OrderPaymentPK implements Serializable {
 
 	private static final long serialVersionUID = 2751060551106019525L;
+
+	@ManyToOne
+	@JoinColumn(name="order_id", referencedColumnName = "id")
+	private Order order;
 	
-	@Column(name="order_id") private Long orderId;
-	@Column(name="payment_instrument_id") private Long paymentInstrumentId;
+	@ManyToOne
+	@JoinColumn(name="payment_instrument_id", referencedColumnName = "id")
+	private PaymentInstrument paymentInstrument;
+	
+	//@Column(name="order_id") private Long orderId;
+	//@Column(name="payment_instrument_id") private Long paymentInstrumentId;
 
 	public OrderPaymentPK() {}
-	public OrderPaymentPK(Long orderId, Long paymentInstrumentId) {
-		this.orderId = orderId;
-		this.paymentInstrumentId = paymentInstrumentId;
+	public OrderPaymentPK(Order order, PaymentInstrument paymentInstrument) {
+		this.order = order;
+		this.paymentInstrument = paymentInstrument;
 	}
 	
-	public Long getOrderId() {
-		return orderId;
+	@ManyToOne
+	public Order getOrder() {
+		return order;
 	}
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
+	public void setOrder(Order order) {
+		this.order = order;
 	}
-	public Long getPaymentInstrumentId() {
-		return paymentInstrumentId;
+	
+	@ManyToOne
+	public PaymentInstrument getPaymentInstrument() {
+		return paymentInstrument;
 	}
-	public void setPaymentInstrumentId(Long paymentInstrumentId) {
-		this.paymentInstrumentId = paymentInstrumentId;
+	public void setPaymentInstrument(PaymentInstrument paymentInstrument) {
+		this.paymentInstrument = paymentInstrument;
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((orderId == null) ? 0 : orderId.hashCode());
-		result = prime * result + ((paymentInstrumentId == null) ? 0 : paymentInstrumentId.hashCode());
+		result = prime * result + ((order == null) ? 0 : order.hashCode());
+		result = prime * result + ((paymentInstrument == null) ? 0 : paymentInstrument.hashCode());
 		return result;
 	}
 	@Override
@@ -48,15 +66,15 @@ public class OrderPaymentPK implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		OrderPaymentPK other = (OrderPaymentPK) obj;
-		if (orderId == null) {
-			if (other.orderId != null)
+		if (order == null) {
+			if (other.order != null)
 				return false;
-		} else if (!orderId.equals(other.orderId))
+		} else if (!order.equals(other.order))
 			return false;
-		if (paymentInstrumentId == null) {
-			if (other.paymentInstrumentId != null)
+		if (paymentInstrument == null) {
+			if (other.paymentInstrument != null)
 				return false;
-		} else if (!paymentInstrumentId.equals(other.paymentInstrumentId))
+		} else if (!paymentInstrument.equals(other.paymentInstrument))
 			return false;
 		return true;
 	}

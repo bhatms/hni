@@ -33,14 +33,13 @@ public class DefaultOrganizationUserService extends DefaultUserService implement
 		this.uorDao = uorDao;
 	}
 
-	@Override
-	public User save(User user, Organization org) {
-		super.save(user);
-
-		UserOrganizationRole uor = new UserOrganizationRole(user, org, Role.get(Constants.USER));
-		uorDao.save(uor);
-		return user;
-	}
+    @Override
+    public User save(User user, Organization org, Role role) {
+        super.save(user);
+        UserOrganizationRole uor = new UserOrganizationRole(user, org, role);
+        uorDao.save(uor);
+        return user;
+    }
 
 	@Override
 	public Collection<User> getByRole(Organization org, Role role) {
@@ -74,6 +73,16 @@ public class DefaultOrganizationUserService extends DefaultUserService implement
 	}
 
 	@Override
+	public void lock(User user) {
+		for(UserOrganizationRole uor : uorDao.get(user)) {
+			uorDao.delete(uor);
+		}
+		user.setDeleted(true);
+		user.setToken("LOCKED");
+		save(user);
+	}
+	
+	@Override
 	public User archive(User user, Organization org) {
 		// TODO
 		return user;
@@ -94,6 +103,16 @@ public class DefaultOrganizationUserService extends DefaultUserService implement
 	@Override
 	public Collection<UserOrganizationRole> getUserOrganizationRoles(User user) {
 		return uorDao.get(user);
+	}
+
+	@Override
+	public Collection<User> byRole(Role role) {
+		Collection<User> users = new HashSet<User>();
+		for (UserOrganizationRole uor : uorDao.byRole(role)) {
+			users.add(this.get(uor.getId().getUserId()));			
+		}
+		
+		return users;
 	}
 
 }
