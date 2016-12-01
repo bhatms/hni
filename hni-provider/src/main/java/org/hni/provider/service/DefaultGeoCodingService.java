@@ -42,18 +42,15 @@ public class DefaultGeoCodingService implements GeoCodingService {
                     Double latitude = ctx.read("$.results[0].geometry.location.lat");
                     Double longitude = ctx.read("$.results[0].geometry.location.lng");
                     addrPoint = new Address();
-                    addrPoint.setLatitude(latitude.toString());
-                    addrPoint.setLongitude(longitude.toString());
+                    addrPoint.setLatitude(latitude);
+                    addrPoint.setLongitude(longitude);
                 }
-
-
             }
         } catch (IOException e) {
             e.printStackTrace();
             return Optional.empty();
         }
         return Optional.of(addrPoint);
-
     }
 
 }

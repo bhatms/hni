@@ -118,7 +118,8 @@ public class DefaultOrderProcessor implements OrderProcessor {
     private String findNearbyMeals(String addressString, PartialOrder order) {
         String output = "";
         try {
-            List<ProviderLocation> nearbyProviders = (ArrayList) locationService.providersNearCustomer(addressString, 3);
+            List<ProviderLocation> nearbyProviders = (ArrayList<ProviderLocation>) locationService.providersNearCustomer(addressString, 3, 10,
+                    6371.01);
             if (!nearbyProviders.isEmpty()) {
                 order.setAddress(addressString);
                 List<ProviderLocation> nearbyWithMenu = new ArrayList<>();
