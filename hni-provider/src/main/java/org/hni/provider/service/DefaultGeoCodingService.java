@@ -45,12 +45,15 @@ public class DefaultGeoCodingService implements GeoCodingService {
                     addrPoint.setLatitude(latitude);
                     addrPoint.setLongitude(longitude);
                 }
+
+
             }
         } catch (IOException e) {
             e.printStackTrace();
             return Optional.empty();
         }
-        return Optional.ofNullable(addrPoint);
+        return Optional.of(addrPoint);
+
     }
 
 }
