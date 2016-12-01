@@ -11,7 +11,7 @@ import org.hni.order.om.OrderItem;
 import org.hni.order.om.PartialOrder;
 import org.hni.order.om.TransactionPhase;
 import org.hni.order.om.type.OrderStatus;
-import org.hni.provider.om.GeoCodingException;
+import org.hni.provider.om.AddressException;
 import org.hni.provider.om.Menu;
 import org.hni.provider.om.MenuItem;
 import org.hni.provider.om.ProviderLocation;
@@ -143,7 +143,7 @@ public class DefaultOrderProcessor implements OrderProcessor {
             } else {
                 output = "No provider locations near this address. Please provide another address or ENDMEAL to quit";
             }
-        } catch (GeoCodingException e) {
+        } catch (AddressException e) {
             output = e.getMessage();
         }
 

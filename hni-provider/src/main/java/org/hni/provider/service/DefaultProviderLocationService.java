@@ -1,8 +1,9 @@
 package org.hni.provider.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hni.common.service.AbstractService;
 import org.hni.provider.dao.ProviderLocationDAO;
-import org.hni.provider.om.GeoCodingException;
+import org.hni.provider.om.AddressException;
 import org.hni.provider.om.LocationQueryParams;
 import org.hni.provider.om.Provider;
 import org.hni.provider.om.ProviderLocation;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+
 import java.util.Collection;
 
 @Service
@@ -39,14 +41,21 @@ public class DefaultProviderLocationService extends AbstractService<ProviderLoca
     public Collection<ProviderLocation> providersNearCustomer(String customerAddress, int itemsPerPage, double distance
             , double radius) {
 
-        Address addrpoint = geoCodingService.resolveAddress(customerAddress).orElse(null);
+        if(!StringUtils.isBlank(customerAddress)) {
+            
+            Address addrpoint = geoCodingService.resolveAddress(customerAddress).orElse(null);
 
-        if (addrpoint != null) {
-            LocationQueryParams locationQuery = transFormLocationToQueryObject(addrpoint, radius, (distance * 1.60934));
-            return providerLocationDao.providersNearCustomer(locationQuery);
+            if (addrpoint != null) {
+                LocationQueryParams locationQuery = transFormLocationToQueryObject(addrpoint, radius, (distance * 1.60934));
+                return providerLocationDao.providersNearCustomer(locationQuery);
+            } else {
+                throw new AddressException("Unable to resolve address");
+            }
+            
         } else {
-            throw new GeoCodingException("Unable to resolve address");
+            throw new AddressException("Invalid address provided");
         }
+	    
     }
 	
 	/**

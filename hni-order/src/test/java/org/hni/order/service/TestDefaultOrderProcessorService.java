@@ -6,7 +6,7 @@ import org.hni.order.om.Order;
 import org.hni.order.om.OrderItem;
 import org.hni.order.om.PartialOrder;
 import org.hni.order.om.TransactionPhase;
-import org.hni.provider.om.GeoCodingException;
+import org.hni.provider.om.AddressException;
 import org.hni.provider.om.Menu;
 import org.hni.provider.om.MenuItem;
 import org.hni.provider.om.Provider;
@@ -167,7 +167,7 @@ public class TestDefaultOrderProcessorService {
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
         Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble(), 
                 Mockito.anyDouble()))
-                .thenThrow(new GeoCodingException("Unable to resolve address"));
+                .thenThrow(new AddressException("Unable to resolve address"));
 
         // Execute
         String output = orderProcessor.processMessage(user, message);

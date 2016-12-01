@@ -1,5 +1,6 @@
 package org.hni.provider.service;
 
+import org.hni.provider.om.AddressException;
 import org.hni.provider.om.Provider;
 import org.hni.provider.om.ProviderLocation;
 import org.junit.Test;
@@ -72,6 +73,24 @@ public class TestProviderLocationService {
 		assertTrue(list.size() > 0);
 
 	}
+	
+	@Test(expected = AddressException.class)
+    public void testGetProviderLocationByCustomerAddr_nullAddress() {
+        providerLocationService.providersNearCustomer(null, 1, 10, 6371.01);
+        fail("Exception is expected");
+    }
+	
+	@Test(expected = AddressException.class)
+    public void testGetProviderLocationByCustomerAddr_emptyAddress() {
+        providerLocationService.providersNearCustomer("  ", 1, 10, 6371.01);
+        fail("Exception is expected");
+    }
+	
+	@Test(expected = AddressException.class)
+    public void testGetProviderLocationByCustomerAddr_invalidAddress() {
+        providerLocationService.providersNearCustomer("not a good addres", 1, 10, 6371.01);
+        fail("Exception is expected");
+    }
 
 	@Test
 	public void testGetProviderLocationByCustomerAddr() {
