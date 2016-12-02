@@ -52,6 +52,15 @@ public class DefaultOrderProcessor implements OrderProcessor {
 
     @Inject
     private EventRouter eventRouter;
+    
+    // TODO: @Value("${address.search.radius}")
+    private static final double RADIUS = 6371.01;
+    
+    // TODO: @Value("${address.search.distance}")
+    private static final double DISTANCE_IN_MILES = 10.0;
+    
+    // TODO: @Value("${address.search.itemsPerPage}")
+    private static final Integer ITEMS_PER_PAGE = 3;
 
     @PostConstruct
     void init() {
@@ -118,8 +127,8 @@ public class DefaultOrderProcessor implements OrderProcessor {
     private String findNearbyMeals(String addressString, PartialOrder order) {
         String output = "";
         try {
-            List<ProviderLocation> nearbyProviders = (ArrayList<ProviderLocation>) locationService.providersNearCustomer(addressString, 3, 10,
-                    6371.01);
+            List<ProviderLocation> nearbyProviders = (ArrayList<ProviderLocation>) locationService.providersNearCustomer(addressString, 
+                    ITEMS_PER_PAGE, DISTANCE_IN_MILES, RADIUS);
             if (!nearbyProviders.isEmpty()) {
                 order.setAddress(addressString);
                 List<ProviderLocation> nearbyWithMenu = new ArrayList<>();
