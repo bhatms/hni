@@ -13,6 +13,8 @@ import javax.persistence.Table;
 
 import org.hni.common.om.Persistable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Provides information about when a ProviderLocation is open for
  * business on any day of week. 
@@ -69,6 +71,7 @@ public class ProviderLocationHour implements Serializable, Persistable {
 		this.closeHour = closeHour;
 	}
 
+	@JsonIgnore
 	public ProviderLocation getProviderLocation() {
 		return providerLocation;
 	}

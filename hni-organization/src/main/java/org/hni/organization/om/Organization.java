@@ -41,6 +41,7 @@ public class Organization implements Persistable, Serializable {
 	
 	@Column(name="name") private String name;
 	@Column(name="phone") private String phone;
+	@Column(name="email") private String email;
 	@Column(name="website") private String website;
 	@Column(name="logo") private String logo;
 	@Column(name="created") private Date created;
@@ -81,6 +82,13 @@ public class Organization implements Persistable, Serializable {
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	public String getWebsite() {
 		return website;

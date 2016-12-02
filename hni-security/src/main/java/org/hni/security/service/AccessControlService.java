@@ -41,7 +41,8 @@ public class AccessControlService {
 		for(UserOrganizationRole uor : userOrganizationRoles) {
 			if (uor.getId().getOrgId().equals(organization.getId())) {
 				Role role = roleDao.get(uor.getId().getRoleId());				
-				userAccess.getRoles().add(role.getName());
+				//userAccess.getRoles().add(role.getName());
+				userAccess.getRoles().add(role.getId().toString()); // UI wants ID's instead
 				// now get the map of permissions to this role
 				List<RolePermission> rolePermissions = rolePermissionDao.byRole(uor.getId().getRoleId());
 				for(RolePermission rp : rolePermissions) {

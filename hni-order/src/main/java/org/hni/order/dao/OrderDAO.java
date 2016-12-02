@@ -12,6 +12,8 @@ import org.hni.user.om.User;
 
 public interface OrderDAO extends BaseDAO<Order> {
 
+	Collection<Order> get(User user);
+
 	Collection<Order> get(User user, LocalDate fromDate, LocalDate toDate);
 
 	Collection<Order> get(Provider provider, LocalDateTime fromDate, LocalDateTime toDate);

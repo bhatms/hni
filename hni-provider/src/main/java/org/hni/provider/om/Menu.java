@@ -1,6 +1,8 @@
 package org.hni.provider.om;
 
-import org.hni.common.om.Persistable;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,9 +16,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import org.hni.common.om.Persistable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Maps the name of a menu and when the menu is applicable
  * during the day.  Hours should be represented in 24hr format.
@@ -80,6 +82,7 @@ public class Menu implements Persistable, Serializable {
 		this.endHourAvailable = endHourAvailable;
 	}
 
+	@JsonIgnore
 	public Provider getProvider() {
 		return provider;
 	}

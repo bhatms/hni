@@ -35,24 +35,55 @@ public class TestTokenFactory {
 	@Inject private AccessControlService accessControlService;
 	
 	@Test
-	public void testCreateToken() throws Exception {
+	public void testVolunteerToken() throws Exception {
 		String subject = "testtoken";
-		User user = new User(7L);
+		User user = new User(8L);
 		Organization organization = new Organization(3L);
 		UserAccessControls acl = accessControlService.getUserAccess(user, organization);
 		String token = JWTTokenFactory.encode(KEY, ISSUER, subject, TTL_MILLIS, user.getId(), mapper.writeValueAsString(acl));
+		Claims claims = JWTTokenFactory.decode(token, KEY, ISSUER);
+		
+		UserAccessControls acl2 = mapper.readValue(claims.get("permissions", String.class), UserAccessControls.class);
+		assertEquals(1, acl2.getPermissions().size());
+		assertEquals("organizations:read:3", acl2.getPermissions().iterator().next());
+		assertEquals(1, acl2.getRoles().size());
+		assertEquals("3", acl2.getRoles().iterator().next());
+		assertEquals(user.getId(), new Long(claims.get("userId", Integer.class).longValue()));
 		System.out.println(token);
 	}
+
 	@Test
-	public void testValidateToken() {
+	public void testVolunteerTokenNonMappedOrg() throws Exception {
 		String subject = "testtoken";
-		Long userId = 1L;
-		String permissions = "test permissions";
-		String token = JWTTokenFactory.encode(KEY, ISSUER, subject, TTL_MILLIS, userId, permissions);
+		User user = new User(8L);
+		Organization organization = new Organization(2L);
+		UserAccessControls acl = accessControlService.getUserAccess(user, organization);
+		String token = JWTTokenFactory.encode(KEY, ISSUER, subject, TTL_MILLIS, user.getId(), mapper.writeValueAsString(acl));
 		Claims claims = JWTTokenFactory.decode(token, KEY, ISSUER);
-		assertNotNull(claims);
-		assertEquals(permissions, claims.get("permissions", String.class));
-		assertEquals(userId, new Long(claims.get("userId", Integer.class).longValue()));
+		
+		UserAccessControls acl2 = mapper.readValue(claims.get("permissions", String.class), UserAccessControls.class);
+		
+		assertEquals(0, acl2.getPermissions().size());
+		assertEquals(0, acl2.getRoles().size());
+		System.out.println(token);
+	}
+
+	@Test
+	public void testElevatedToken() throws Exception {
+		String subject = "testtoken";
+		User user = new User(1L);
+		Organization organization = new Organization(2L);
+		UserAccessControls acl = accessControlService.getUserAccess(user, organization);
+		String token = JWTTokenFactory.encode(KEY, ISSUER, subject, TTL_MILLIS, user.getId(), mapper.writeValueAsString(acl));
+		Claims claims = JWTTokenFactory.decode(token, KEY, ISSUER);
+		
+		UserAccessControls acl2 = mapper.readValue(claims.get("permissions", String.class), UserAccessControls.class);
+				
+		assertEquals(1, acl2.getRoles().size());
+		assertEquals("*:*:*", acl2.getPermissions().iterator().next());
+		assertEquals(1, acl2.getPermissions().size());
+		assertEquals("1", acl2.getRoles().iterator().next());
+		assertEquals(user.getId(), new Long(claims.get("userId", Integer.class).longValue()));
 		System.out.println(token);
 	}
 

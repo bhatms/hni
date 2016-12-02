@@ -1,7 +1,6 @@
 package org.hni.order.dao;
 
 import org.junit.Assert;
-import org.hni.order.om.OrderItem;
 import org.hni.order.om.PartialOrder;
 import org.hni.order.om.TransactionPhase;
 import org.hni.provider.om.MenuItem;
@@ -39,7 +38,7 @@ public class TestDefaultPartialOrderDAO {
         set.add(new MenuItem(1L));
         partialOrder.setMenuItemSelected(set);
         partialOrder.setProviderLocationsForSelection(Arrays.asList(new ProviderLocation(2L)));
-        partialOrder.setTransactionPhase(TransactionPhase.CONFIRM_OR_CONTINUE);
+        partialOrder.setTransactionPhase(TransactionPhase.CONFIRM_OR_REDO);
 
         partialOrderDAO.save(partialOrder);
         PartialOrder orderReceived = (PartialOrder) partialOrderDAO.get(1L);

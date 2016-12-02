@@ -37,7 +37,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/users", description = "Operations on Users and to manage Users relationships to organiations")
 @Component
 @Path("/users")
-public class UserServiceController {
+public class UserServiceController extends AbstractBaseController {
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceController.class);
 	
 	@Inject private OrganizationUserService orgUserService;
@@ -64,7 +64,10 @@ public class UserServiceController {
 	, response = User.class
 	, responseContainer = "")
 	public User addOrSaveUser(User user) {
-		return orgUserService.save(user);
+		if (isPermitted(Constants.ORGANIZATION, Constants.CREATE, 0L)) {
+			return orgUserService.save(user);
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@DELETE
@@ -75,10 +78,13 @@ public class UserServiceController {
 	, response = User.class
 	, responseContainer = "")
 	public String deleteUser(@PathParam("id") Long id, @PathParam("orgId") Long orgId, @PathParam("roleId") Long roleId) {
-		User user = new User(id);
-		Organization org = new Organization(orgId);
-		orgUserService.delete(user, org, Role.get(roleId));
-		return "OK";
+		if (isPermitted(Constants.ORGANIZATION, Constants.DELETE, id)) {
+			User user = new User(id);
+			Organization org = new Organization(orgId);
+			orgUserService.delete(user, org, Role.get(roleId));
+			return "OK";
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@PUT
@@ -89,9 +95,12 @@ public class UserServiceController {
 	, response = UserOrganizationRole.class
 	, responseContainer = "")
 	public UserOrganizationRole addUserToOrg(@PathParam("id") Long id, @PathParam("orgId") Long orgId, @PathParam("roleId") Long roleId) {
-		User user = new User(id);
-		Organization org = new Organization(orgId);
-		return orgUserService.associate(user, org, Role.get(roleId));
+		if (isPermitted(Constants.ORGANIZATION, Constants.UPDATE, id)) {
+			User user = new User(id);
+			Organization org = new Organization(orgId);
+			return orgUserService.associate(user, org, Role.get(roleId));
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 	
 	@GET
@@ -126,16 +135,19 @@ public class UserServiceController {
 	, response = User.class
 	, responseContainer = "")
 	public String deleteUserFromOrg(@PathParam("id") Long id, @PathParam("orgId") Long orgId) {
-		User user = new User(id);
-		Organization org = new Organization(orgId);
-		orgUserService.delete(user, org);
-		return "OK";
+		if (isPermitted(Constants.ORGANIZATION, Constants.DELETE, id)) {
+			User user = new User(id);
+			Organization org = new Organization(orgId);
+			orgUserService.delete(user, org);
+			return "OK";
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@GET
 	@Path("/userinfo")
 	@Produces({MediaType.APPLICATION_JSON})
-	@ApiOperation(value = "Returns the user with the given id"
+	@ApiOperation(value = "Returns info about the user in the current thread context"
 	, notes = ""
 	, response = User.class
 	, responseContainer = "")
@@ -147,13 +159,12 @@ public class UserServiceController {
 	@GET
 	@Path("/organizations")
 	@Produces({MediaType.APPLICATION_JSON})
-	@ApiOperation(value = "Returns the user with the given id"
+	@ApiOperation(value = "All users for all organizations..yikes!"
 	, notes = ""
 	, response = User.class
 	, responseContainer = "")
 	public Collection<User> getUsersByRole(@QueryParam("roleId") Long roleId) {
-		// TODO: MUST add this security layer
-		if (SecurityUtils.getSubject().hasRole("Super User")) {		
+		if (SecurityUtils.getSubject().hasRole(Constants.SUPER_USER.toString())) {		
 			return orgUserService.byRole(Role.get(roleId));
 		}
 		throw new HNIException("You must have elevated permissions to do this.");

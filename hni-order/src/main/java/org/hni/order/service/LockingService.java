@@ -1,6 +1,6 @@
 package org.hni.order.service;
 
-public interface LockingService {
+public interface LockingService<T> {
 
 	boolean acquireLock(String key);
 	boolean acquireLock(String key, Long ttlMinutes);
@@ -8,6 +8,5 @@ public interface LockingService {
 	void releaseLock(String key);
 	void shutdown();
 	
-	void addCache(String key, Object object);
-	Object getCache(String key);
+	T getNativeClient();
 }

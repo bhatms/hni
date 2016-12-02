@@ -52,7 +52,7 @@ public class DefaultGeoCodingService implements GeoCodingService {
             e.printStackTrace();
             return Optional.empty();
         }
-        return Optional.of(addrPoint);
+        return Optional.ofNullable(addrPoint);
 
     }
 

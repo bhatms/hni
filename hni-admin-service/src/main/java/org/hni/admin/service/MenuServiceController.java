@@ -11,6 +11,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.shiro.SecurityUtils;
+import org.hni.common.Constants;
+import org.hni.common.exception.HNIException;
 import org.hni.provider.om.Menu;
 import org.hni.provider.om.MenuItem;
 import org.hni.provider.om.Provider;
@@ -25,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/menus", description = "Operations on Menus and MenuItems")
 @Component
 @Path("/menus")
-public class MenuServiceController {
+public class MenuServiceController extends AbstractBaseController {
 	private static final Logger logger = LoggerFactory.getLogger(MenuServiceController.class);
 	
 	@Inject private MenuService menuService;
@@ -49,8 +52,11 @@ public class MenuServiceController {
 		, response = Menu.class
 		, responseContainer = "")
 	public Menu saveOrder(@PathParam("id") Long id, Menu menu) {
-		menu.setProvider(new Provider(id));
-		return menuService.save(menu);
+		if (isPermitted(Constants.MENU, Constants.CREATE, id)) {
+			menu.setProvider(new Provider(id));
+			return menuService.save(menu);
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@DELETE
@@ -61,7 +67,10 @@ public class MenuServiceController {
 		, response = Menu.class
 		, responseContainer = "")
 	public Menu getDelete(@PathParam("id") Long id) {
-		return menuService.delete(new Menu(id));
+		if (isPermitted(Constants.MENU, Constants.DELETE, id)) {
+			return menuService.delete(new Menu(id));
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@GET
@@ -83,11 +92,14 @@ public class MenuServiceController {
 		, response = Menu.class
 		, responseContainer = "")
 	public Menu saveMenuItem(@PathParam("id") Long id, MenuItem menuItem) {
-		Menu menu = menuService.get(id);
-		if ( null != menu ) {
-			menu.getMenuItems().add(menuItem);
+		if (isPermitted(Constants.MENU, Constants.CREATE, id)) {
+			Menu menu = menuService.get(id);
+			if ( null != menu ) {
+				menu.getMenuItems().add(menuItem);
+			}
+			return menuService.save(menu);
 		}
-		return menuService.save(menu);
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@DELETE
@@ -98,11 +110,14 @@ public class MenuServiceController {
 		, response = Menu.class
 		, responseContainer = "")
 	public Menu deleteMenuItem(@PathParam("id") Long id, @PathParam("miid") Long miid) {
-		Menu menu = menuService.get(id);
-		if ( null != menu ) {
-			MenuItem menuItem = new MenuItem(miid);
-			menu.getMenuItems().remove(menuItem);
+		if (isPermitted(Constants.MENU, Constants.DELETE, id)) {
+			Menu menu = menuService.get(id);
+			if ( null != menu ) {
+				MenuItem menuItem = new MenuItem(miid);
+				menu.getMenuItems().remove(menuItem);
+			}
+			return menuService.save(menu);
 		}
-		return menuService.save(menu);
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 }

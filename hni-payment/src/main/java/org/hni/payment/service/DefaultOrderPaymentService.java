@@ -3,8 +3,10 @@ package org.hni.payment.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -19,6 +21,8 @@ import org.hni.payment.om.PaymentInfo;
 import org.hni.payment.om.PaymentInstrument;
 import org.hni.provider.om.Provider;
 import org.hni.user.om.User;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,11 +37,11 @@ public class DefaultOrderPaymentService extends AbstractService<OrderPayment> im
 	
 	private OrderPaymentDAO orderPaymentDao;
 	private PaymentInstrumentDAO paymentInstrumentDao;
-	private LockingService lockingService;
+	private LockingService<RedissonClient> lockingService;
 	private OrderDAO orderDao;
 	
 	@Inject
-	public DefaultOrderPaymentService(OrderPaymentDAO orderPaymentDao, PaymentInstrumentDAO paymentInstrumentDao, OrderDAO orderDao, LockingService lockingService) {
+	public DefaultOrderPaymentService(OrderPaymentDAO orderPaymentDao, PaymentInstrumentDAO paymentInstrumentDao, OrderDAO orderDao, LockingService<RedissonClient> lockingService) {
 		super(orderPaymentDao);
 		this.orderPaymentDao = orderPaymentDao;
 		this.paymentInstrumentDao = paymentInstrumentDao;
@@ -72,17 +76,34 @@ public class DefaultOrderPaymentService extends AbstractService<OrderPayment> im
 	@Override
 	public Collection<OrderPayment> paymentFor(Order order, Provider provider, Double amount, User user) throws PaymentsExceededException {
 		Collection<PaymentInstrument> providerCards = paymentInstrumentDao.with(provider);
-		Collection<OrderPayment> orderPayments = new HashSet();
+		Collection<OrderPayment> orderPayments = new HashSet<>();
+
+		Double total = addOrderAmount(order);
+		BigDecimal amountNeeded = BigDecimal.valueOf(amount);
+		Double alreadyRequestedAmount = fromCache(order);
 		
-		BigDecimal theAmount = BigDecimal.valueOf(amount);
-		//BigDecimal totalAmount = calcExistingPayments(order);
+		if (addOrderAmount(order) <= 0) {
+			logger.info(String.format("Order[%d] total amount is $%.2f.  Returning no payments", order.getId(), total));
+			return orderPayments;
+		}
 		
+		logger.info(String.format("Order[%d] total amount is $%.2f.  Requested amount is $%.2f", order.getId(), total, amount));
+		
+		// force the amount to be the max needed to finish the order payment.
+		BigDecimal adjustedNeeded = BigDecimal.valueOf(total).subtract(BigDecimal.valueOf(alreadyRequestedAmount));
+		if (adjustedNeeded.doubleValue() > amountNeeded.doubleValue()) {
+			logger.info(String.format("Order[%d] total=$%.2f, alreadyRequestdPayments=$%.2f.  The amount needed $%.2f is greather than requested $%.2f, setting to greater value."
+					, order.getId(), total, alreadyRequestedAmount, adjustedNeeded, amount));
+			amountNeeded = adjustedNeeded;
+		}
+		if (providerCards.size() == 0) {
+			logger.warn(String.format("There are no cards available for provider[%d] - %s", provider.getId(), provider.getName()));
+		}
 		for(PaymentInstrument paymentInstrument : providerCards) {
 			if ( lockingService.acquireLock(lockingKey(paymentInstrument), DEFAULT_CARD_LOCKOUT_MINS)  ) {
 				logger.info("locking card "+lockingKey(paymentInstrument));
-				BigDecimal amountToDispense = calcAmountToDispense(paymentInstrument, theAmount);
-				theAmount = theAmount.subtract(amountToDispense);
-				//totalAmount = totalAmount.add(amountToDispense);
+				BigDecimal amountToDispense = calcAmountToDispense(paymentInstrument, amountNeeded);
+				amountNeeded = amountNeeded.subtract(amountToDispense);
 				
 				OrderPayment orderPayment = new OrderPayment(order, paymentInstrument, amountToDispense.doubleValue(), user);
 				orderPayments.add(orderPayment);
@@ -90,13 +111,15 @@ public class DefaultOrderPaymentService extends AbstractService<OrderPayment> im
 				paymentInstrument.setLastUsedDatetime(new Date());
 				paymentInstrumentDao.save(paymentInstrument);
 				
-				if ( theAmount.doubleValue() <= 0 ) {
+				if ( amountNeeded.doubleValue() <= 0 ) {
 					break;
 				}
 			}
 		}
 		
 		if (totalAmountRequestedExceedsTotal(order, orderPayments)) {
+			logger.warn(String.format("You have requested more funds for order[%d] than you really need.  Shutting down this account...", order.getId()));
+			clearCache(order); // clear payment info so somebody else doesn't get locked out for the same issue
 			throw new PaymentsExceededException("You have requested more funds than you really need.  Shutting down this account...");
 		}		
 		return orderPayments;
@@ -126,16 +149,49 @@ public class DefaultOrderPaymentService extends AbstractService<OrderPayment> im
 	
 	private boolean totalAmountRequestedExceedsTotal(Order order, Collection<OrderPayment> orderPayments) {
 		Double total = 1.25*addOrderAmount(order); // add 25%
-		Collection<OrderPayment> prevOrderPayments = (Collection<OrderPayment>) lockingService.getCache(orderPaymentsKey(order));
-		Collection<OrderPayment> allPayments = new ArrayList<OrderPayment>(orderPayments);
-		allPayments.addAll(prevOrderPayments);
-		lockingService.addCache(orderPaymentsKey(order), allPayments);
+		Double totalPrevPayments = fromCache(order);
 		
-		double paymentTotal = allPayments.stream().mapToDouble(o -> o.getAmount()).sum(); 
+		double paymentTotal = totalPrevPayments + orderPayments.stream().mapToDouble(o -> o.getAmount()).sum();
+		// push all payments into cache
+		toCache(order, paymentTotal);
+		
+		 
+		logger.info(String.format("Order amount = $%.2f (+25%%) and total payments dispensed = $%.2f", total, paymentTotal ));
 		return (paymentTotal > total);
 	}
 
 	private String orderPaymentsKey(Order order) {
 		return String.format("order-payments:%d", order.getId());
 	}
+	
+	private void toCache(Order order, Double paymentTotal) {
+		
+		try {
+			RBucket<Double> bucket = lockingService.getNativeClient().getBucket(orderPaymentsKey(order));
+			bucket.set(paymentTotal, 2*DEFAULT_CARD_LOCKOUT_MINS, TimeUnit.MINUTES);
+		} catch(Exception e) {
+			// log it and move on
+			logger.warn("Unable to push orderPayments into cache for "+orderPaymentsKey(order));
+		}
+	}
+	
+	private Double fromCache(Order order) {	
+		try {
+			RBucket<Double> bucket = lockingService.getNativeClient().getBucket(orderPaymentsKey(order));
+			Double value = bucket.get();
+			if (null == value) {
+				return value = 0.0;
+			}
+			logger.info(String.format("Returning previously dispensed payments for %s of $%.2f", orderPaymentsKey(order), order.getId(), value));
+			return value;
+		} catch(Exception e) {
+			logger.warn("Unable to get orderPayments from cache for "+orderPaymentsKey(order));
+			return 0.0;
+		}
+	}
+	
+	private void clearCache(Order order) {
+		lockingService.getNativeClient().getBucket(orderPaymentsKey(order)).delete();
+	}
+	
 }

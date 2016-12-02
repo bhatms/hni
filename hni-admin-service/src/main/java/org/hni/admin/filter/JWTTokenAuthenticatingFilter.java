@@ -97,6 +97,12 @@ public class JWTTokenAuthenticatingFilter extends AuthenticatingFilter {
 	@Override
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
 		boolean loggedIn = executeLogin(request, response);
+		if (!loggedIn) {
+			HttpServletResponse httpResponse = (HttpServletResponse)response;
+			httpResponse.setContentType(MediaType.APPLICATION_JSON);
+			httpResponse.getOutputStream().write(String.format("{\"message\":\"%s\"}","Unable to authenticate using the token or credentials provided").getBytes());
+			httpResponse.setStatus(Response.Status.UNAUTHORIZED.getStatusCode());
+			}
 		return loggedIn;
 	}
 
@@ -106,7 +112,7 @@ public class JWTTokenAuthenticatingFilter extends AuthenticatingFilter {
 		HttpServletResponse httpResponse = (HttpServletResponse)response;
 		if ( null != existing ) {
 			httpResponse.setContentType(MediaType.APPLICATION_JSON);
-			httpResponse.getOutputStream().write(String.format("{\"error\":\"%s\"}", existing.getMessage()).getBytes());
+			httpResponse.getOutputStream().write(String.format("{\"message\":\"%s\"}", existing.getMessage()).getBytes());
 			httpResponse.setStatus(Response.Status.UNAUTHORIZED.getStatusCode());
 			existing = null; // prevent Shiro from tossing a ServletException
 		}

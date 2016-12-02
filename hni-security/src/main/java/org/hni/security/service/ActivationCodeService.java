@@ -1,5 +1,7 @@
 package org.hni.security.service;
 
+import java.util.List;
+
 import org.hni.common.service.BaseService;
 import org.hni.security.om.ActivationCode;
 import org.hni.user.om.User;
@@ -19,4 +21,11 @@ public interface ActivationCodeService extends BaseService<ActivationCode> {
 	 * @return
 	 */
 	boolean validate(String authCode);
+	
+	/**
+	 * Return active validation codes for a user
+	 * @param user
+	 * @return
+	 */
+	List<ActivationCode> getByUser(User user);
 }

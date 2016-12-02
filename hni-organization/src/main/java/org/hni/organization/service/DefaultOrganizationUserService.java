@@ -63,8 +63,9 @@ public class DefaultOrganizationUserService extends DefaultUserService implement
 
 	@Override
 	public void delete(User user, Organization org) {
-		// TODO
-
+		for (UserOrganizationRole uor : uorDao.get(user)) {
+			uorDao.delete(uor);
+		}
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class DefaultOrganizationUserService extends DefaultUserService implement
 			uorDao.delete(uor);
 		}
 		user.setDeleted(true);
-		user.setToken("LOCKED");
+		user.setHashedSecret("LOCKED");
 		save(user);
 	}
 	

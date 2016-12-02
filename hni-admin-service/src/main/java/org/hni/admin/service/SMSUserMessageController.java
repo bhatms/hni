@@ -84,9 +84,9 @@ public class SMSUserMessageController extends AbstractBaseController {
         logger.info("JSON/Received a message, auth_key={}, phonenumber={}, sessionid={}, " +
                 "usertext={}, textmode={}", authKey, phoneNumber, sessionId, userMessage, testMode);
         final Event event = Event.createEvent("text/plain", phoneNumber, userMessage);
-        final String returnMessage = eventRouter.handleEvent(event);
         Map<String, Object> res = new HashMap();
         try {
+            final String returnMessage = eventRouter.handleEvent(event);
             String[] output = {returnMessage};
             res.put("message", output);
             res.put("status", Response.Status.OK.getStatusCode());
@@ -97,6 +97,7 @@ public class SMSUserMessageController extends AbstractBaseController {
             throw new HNIException(Response.status(ex.getResponse().getStatus()).entity(res).build());
         } catch (Exception ex) {
             logger.error("Internal error handling request: {}", ex.getMessage());
+            ex.printStackTrace();
             res.put("error", "Something went wrong. Please try again later.");
             res.put("status", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
             throw new HNIException(Response.serverError().entity(res).build());

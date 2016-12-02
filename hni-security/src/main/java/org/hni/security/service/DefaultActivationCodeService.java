@@ -4,11 +4,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.hni.common.service.AbstractService;
 import org.hni.security.dao.ActivationCodeDAO;
 import org.hni.security.om.ActivationCode;
+import org.hni.user.om.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -45,6 +48,10 @@ public class DefaultActivationCodeService extends AbstractService<ActivationCode
         return activationCodeDao.getByActivationCode(authCode);
     }
 
+	@Override
+	public List<ActivationCode> getByUser(User user) {
+		return activationCodeDao.getByUser(user);
+	}
     /**
      * WARNING This implementation WILL NOT work with JPA generated Ids. This method was implemented
      * with the assumption that authCodes are already available, and decoded values of authCodes will be

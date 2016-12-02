@@ -1,7 +1,9 @@
 package org.hni.provider.om;
 
-import org.hni.common.om.Persistable;
-import org.hni.user.om.Address;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,10 +17,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import org.hni.common.om.Persistable;
+import org.hni.user.om.Address;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Represents a physical location for a provider generally where
@@ -96,6 +98,8 @@ public class ProviderLocation implements Persistable, Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	@JsonIgnore
 	public Provider getProvider() {
 		return provider;
 	}

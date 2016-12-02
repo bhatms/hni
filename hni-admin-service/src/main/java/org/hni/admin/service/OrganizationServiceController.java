@@ -12,6 +12,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.hni.common.Constants;
+import org.hni.common.exception.HNIException;
 import org.hni.organization.om.Organization;
 import org.hni.organization.service.OrganizationService;
 import org.hni.organization.service.OrganizationUserService;
@@ -26,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/organizations", description = "Operations on Organizations")
 @Component
 @Path("/organizations")
-public class OrganizationServiceController {
+public class OrganizationServiceController extends AbstractBaseController {
 	private static final Logger logger = LoggerFactory.getLogger(OrganizationServiceController.class);
 	
 	@Inject private OrganizationService orgService;
@@ -51,7 +53,10 @@ public class OrganizationServiceController {
 	, response = Organization.class
 	, responseContainer = "")
 	public Organization saveOrUpdate(Organization org) {
-		return orgService.save(org);
+		if (isPermitted(Constants.ORGANIZATION, Constants.CREATE, 0L)) {
+			return orgService.save(org);
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 
 	@DELETE
@@ -62,7 +67,10 @@ public class OrganizationServiceController {
 	, response = Organization.class
 	, responseContainer = "")
 	public Organization deleteOrganization(@PathParam("id") Long id) {
-		return orgService.delete(new Organization(id));
+		if (isPermitted(Constants.ORGANIZATION, Constants.DELETE, 0L)) {
+			return orgService.delete(new Organization(id));
+		}
+		throw new HNIException("You must have elevated permissions to do this.");
 	}
 	
 	@GET

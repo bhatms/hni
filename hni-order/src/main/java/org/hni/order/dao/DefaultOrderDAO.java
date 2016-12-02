@@ -28,9 +28,21 @@ public class DefaultOrderDAO extends AbstractDAO<Order> implements OrderDAO {
 	}
 
 	@Override
+	public Collection<Order> get(User user) {
+		//logger.info("Searching for orders between {} and {}", fromDate.toString(), toDate.toString());
+		try {
+			Query q = em.createQuery("SELECT x FROM Order x WHERE x.user.id = :userId")
+					.setParameter("userId", user.getId());
+			return q.getResultList();
+		} catch(NoResultException e) {
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
 	public Collection<Order> get(User user, LocalDate fromDate, LocalDate toDate) {
 		try {
-			Query q = em.createQuery("SELECT x FROM Order x WHERE x.userId = :userId AND x.orderDate BETWEEN :fromDate AND :toDate")
+			Query q = em.createQuery("SELECT x FROM Order x WHERE x.user.id = :userId AND x.orderDate BETWEEN :fromDate AND :toDate")
 				.setParameter("userId", user.getId())
 				.setParameter("fromDate", DateUtils.asDate(fromDate))
 				.setParameter("toDate", DateUtils.asDate(toDate));

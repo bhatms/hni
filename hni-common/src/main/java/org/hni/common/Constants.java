@@ -8,9 +8,10 @@ public interface Constants {
 	static final Long CLIENT = 7L;
 	
 	// domains
-	static final String ORGANIZATION = "organization";
-	static final String PROVIDER = "provider";
-	static final String ORDER = "order";
+	static final String ORGANIZATION = "organizations";
+	static final String PROVIDER = "providers";
+	static final String ORDER = "orders";
+	static final String MENU = "menus";
 	
 	// basic permissions
 	static final String CREATE = "create";

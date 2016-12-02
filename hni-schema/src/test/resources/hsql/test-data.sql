@@ -9,11 +9,14 @@ insert into users values(5, 'Ericka', 'Energy', 'F', '123-456-7830', '' ,0, '', 
 insert into users values(6, 'Barbara', 'Bollingsworth', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
 insert into users values(7, 'VOLUNTEER1', 'voliunteer', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
 insert into users values(8, 'VOLUNTEER2', 'voliunteer', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
+insert into users values(9, 'Client', 'HasExceededOrders', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
+insert into users values(10, 'Client', 'HasMoreOrders', 'F', '123-456-7830', '' ,0, '', '', now(), '0');
+
 
 truncate table organizations;
-insert into organizations values(1, 'Not Impossible', 'phone', 'website', 'logo', now(), 1);
-insert into organizations values(2, 'Samaritan House', 'phone', 'website', 'logo', now(), 1);
-insert into organizations values(3, 'Volunteer Organization', 'phone', 'website', 'logo', now(), 1);
+insert into organizations values(1, 'Not Impossible', 'phone', 'ni@email.net', 'website', 'logo', now(), 1);
+insert into organizations values(2, 'Samaritan House', 'phone', 'emailsam@samhouse.net', 'website', 'logo', now(), 1);
+insert into organizations values(3, 'Volunteer Organization', 'phone', 'noreply@nowhere.net', 'website', 'logo', now(), 1);
 
 truncate table user_organization_role;
 insert into user_organization_role values(1, 2, 1);
@@ -30,6 +33,8 @@ insert into user_organization_role values(6, 2, 5);
 insert into user_organization_role values(6, 2, 2);
 insert into user_organization_role values(7, 3, 3);
 insert into user_organization_role values(8, 3, 3);
+insert into user_organization_role values(9, 2, 7);
+insert into user_organization_role values(10, 2, 7);
 
 truncate table menus;
 truncate table menu_items;
@@ -43,6 +48,14 @@ truncate table orders;
 insert into orders values(1, 2, 1, now(), now(), null, 9.95, 1.20, 1, 1);
 insert into orders values(2, 2, 1, now(), now(), null, 9.95, 1.20, 1, 1);
 insert into orders values(3, 2, 1, now(), now(), null, 9.95, 1.20, 1, 1);
+insert into orders values(4, 9, 1, dateadd('HOUR', -8, current_date), now(), null, 9.95, 1.20, 1, 1);
+insert into orders values(5, 10, 1, dateadd('HOUR', -8, current_date), now(), null, 9.95, 1.20, 1, 1);
+
+
+truncate table order_items;
+insert into order_items values(null, 1, 1, 1, 6.99);
+insert into order_items values(null, 2, 2, 1, 7.99);
+insert into order_items values(null, 2, 3, 1, 8.99);
 
 truncate table security_roles;
 insert into security_roles values(1,'Super User');
@@ -108,6 +121,9 @@ insert into activation_codes values(1, '1234567890', 2, 10, 10, 1, null, now(), 
 insert into activation_codes values(2, '7h-1234567890', 2, 10, 10, 1, 'freddy has activated this', now(), 2);
 insert into activation_codes values(3, '123456', 2, 10, 10, 1, null, now(), null);
 insert into activation_codes values(4, '987654', 2, 10, 10, 0, null, now(), null);
+insert into activation_codes values(5, 'x1987654', 2, 10, 10, 1, 'test for no more meals', now(), 9);
+insert into activation_codes values(6, 'y1987654', 2, 10, 10, 1, 'test for more meals', now(), 10);
+insert into activation_codes values(7, 'z1987654', 2, 10, 10, 1, 'test for more meals', now(), 10);
 
 truncate table addresses;
 insert into addresses values (1, 'subway corp addr', '1251 Phoenician way', '', 'columbus','oh','43240', -82.98402279999999, 40.138686,'etc');

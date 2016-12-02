@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS `organizations` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NULL,
   `phone` VARCHAR(45) NULL,
+  `email` VARCHAR(255) NULL,
   `website` VARCHAR(255) NULL,
   `logo` VARCHAR(255) NULL,
   `created` DATETIME NOT NULL,

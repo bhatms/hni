@@ -14,14 +14,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.SecurityUtils;
+import org.hni.common.Constants;
 import org.hni.common.exception.HNIException;
 import org.hni.order.om.Order;
 import org.hni.order.service.OrderService;
 import org.hni.payment.om.OrderPayment;
 import org.hni.payment.om.PaymentInfo;
+import org.hni.payment.om.PaymentInstrument;
 import org.hni.payment.service.OrderPaymentService;
 import org.hni.payment.service.PaymentsExceededException;
 import org.hni.provider.om.Provider;
+import org.hni.provider.om.ProviderLocation;
+import org.hni.provider.om.ProviderLocationHour;
 import org.hni.provider.service.ProviderService;
 import org.hni.user.om.User;
 import org.slf4j.Logger;
@@ -55,7 +59,7 @@ public class PaymentController extends AbstractBaseController {
 	@GET
 	@Path("/payment-instruments/")
 	@Produces({MediaType.APPLICATION_JSON})
-	@ApiOperation(value = "Returns a collectio of payment instruments that can be used to pay for an order"
+	@ApiOperation(value = "Returns a collection of payment instruments that can be used to pay for an order"
 		, notes = "encrypted"
 		, response = Order.class
 		, responseContainer = "")
@@ -71,7 +75,7 @@ public class PaymentController extends AbstractBaseController {
 				// this exception indicates the user requested 25% more than the expected amount for the order.
 				// this will do an automatic lockout
 				User user = getLoggedInUser();
-				if (!SecurityUtils.getSubject().hasRole("Super User")) {					
+				if (!SecurityUtils.getSubject().hasRole(Constants.SUPER_USER.toString())) {					
 					logger.warn(String.format("** Funds request exceeded! Locking account for user[%d] %s %s (%s)", user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()));
 					organizationUserService.lock(getLoggedInUser());
 					logger.warn(String.format("Release locking on order %d", order.getId()));
@@ -107,7 +111,10 @@ public class PaymentController extends AbstractBaseController {
 			String json = mapper.writeValueAsString(JsonView.with(orderPayments)
 					.onClass(Order.class, Match.match().exclude("*").include("id", "subtotal"))
 					.onClass(User.class, Match.match().exclude("*").include("id", "firstName", "lastName"))
-			.onClass(Provider.class, Match.match().exclude("*").include("id", "name")));
+					.onClass(ProviderLocation.class, Match.match().exclude("*"))
+					.onClass(ProviderLocationHour.class, Match.match().exclude("*").include("dow", "openHour", "closeHour"))
+					.onClass(Provider.class, Match.match().exclude("*").include("id", "name"))
+					.onClass(PaymentInstrument.class, Match.match().exclude("*").include("id", "cardNumber", "pinNumber")));
 			return json;
 		} catch (JsonProcessingException e) {
 			logger.error("Serializing User object:"+e.getMessage(), e);

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -19,7 +20,6 @@ import org.apache.shiro.util.SimpleByteSource;
 import org.apache.shiro.util.ThreadContext;
 import org.hni.common.Constants;
 import org.hni.security.om.OrganizationUserRolePermission;
-import org.hni.security.om.Permission;
 import org.hni.security.om.UserAccessControls;
 import org.hni.security.realm.token.JWTAuthenticationToken;
 import org.hni.user.om.User;
@@ -47,11 +47,15 @@ public class TokenRealm extends PasswordRealm {
 			user = userDao.get(jwtToken.getUserId());
 			if (null == user) {
 				logger.warn("Could not find User for principal:" + token.getPrincipal());
-				return new SimpleAuthenticationInfo("", "", new SimpleByteSource(REALM_NAME.getBytes()), REALM_NAME);
+				throw new AuthenticationException("Could not find User for principal:" + token.getPrincipal());
+			}
+			if (user.isDeleted() || StringUtils.defaultString(user.getHashedSecret()).equals("LOCKED")) {
+				logger.warn(String.format("User[%d] %s %s %s attempting to use token on locked account!", user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()));
+				throw new AuthenticationException(String.format("User[%d] %s %s %s attempting to use token on locked account!", user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()));
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			return new SimpleAuthenticationInfo("", "", new SimpleByteSource(REALM_NAME.getBytes()), REALM_NAME);
+			throw new AuthenticationException("Could not authenticate:"+e.getMessage());
 		}
 		ByteSource salt = new SimpleByteSource(Base64.decodeBase64(user.getSalt()));
 		logger.info("Auth info = " + user.getEmail() + " - " + user.getHashedSecret());
