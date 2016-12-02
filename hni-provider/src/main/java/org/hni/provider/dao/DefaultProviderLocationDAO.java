@@ -37,22 +37,21 @@ public class DefaultProviderLocationDAO extends AbstractDAO<ProviderLocation> im
 
         try {
 
-            String queryString = new StringBuilder()
-                    .append("SELECT pl.* FROM provider_locations pl ")
-                    .append(" WHERE pl.address_id in ")
-                    .append(" ( select new_addr.id from ")
-                    .append(" (SELECT id, ")
-                    .append(" ( acos(sin(:custLatRad) * sin(radians(latitude)) + ")
-                    .append(" cos(:custLatRad) * cos(radians(latitude)) * cos(radians(longitude) - :custLongRad))   ) as distance")
+            String queryString = new StringBuilder(
+                            "SELECT pl.* FROM provider_locations pl " +
+                            " WHERE pl.address_id in " +
+                            " ( select new_addr.id from " +
+                            " (SELECT id, " +
+                            " ( acos(sin(:custLatRad) * sin(radians(latitude)) + " +
+                            " cos(:custLatRad) * cos(radians(latitude)) * cos(radians(longitude) - :custLongRad))   ) as distance" +
                     
-                    .append( " FROM addresses ")
-                    .append(" WHERE (latitude >= :minLatDeg AND latitude <= :maxLatDeg) AND (longitude >= :minLongDeg ") 
-                    .append( locationQuery.isMeridian180WithinDistance() ? "OR" : "AND")
-                    .append(" longitude <= :maxLongDeg) " )
-                    .append(" group by id having distance <= :dist order by distance" )
-                    .append("   )")
-                    
-                    .append("  as new_addr )")
+                            " FROM addresses " +
+                            " WHERE (latitude >= :minLatDeg AND latitude <= :maxLatDeg) AND (longitude >= :minLongDeg " +
+                            (locationQuery.isMeridian180WithinDistance() ? "OR" : "AND") +
+                            " longitude <= :maxLongDeg) "  +
+                            " group by id having distance <= :dist order by distance" +
+                            "   )" +
+                            "  as new_addr )")
                     .toString();
             
 
