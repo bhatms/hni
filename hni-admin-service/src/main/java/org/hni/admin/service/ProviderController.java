@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -142,13 +143,14 @@ public class ProviderController extends AbstractBaseController {
 	public Collection<ProviderLocation> getProviderLocationsByCustomerAddress(
 			@QueryParam("customerId") Long custId,
 			@NotNull @QueryParam("address") String customerAddress,
-			@QueryParam("itemsPerPage") int itemsPerPage,
-			@QueryParam("pageNumber") int pageNum) {
+			@DefaultValue("1") @QueryParam("itemsPerPage") int itemsPerPage,
+			@DefaultValue("1") @QueryParam("pageNumber") int pageNum,
+			@DefaultValue("10") @QueryParam("distance") double distance) {
 		if (!StringUtils.isBlank(customerAddress)) {
 			// ### TODO: The last two arguments are no-ops right now. These are place holders for when the efficient geo-search
 			// ### algorithm is brought back into play.
 			// Github issue #58 - https://github.com/hungernotimpossible/hni/issues/58
-			return providerLocationService.providersNearCustomer(customerAddress, itemsPerPage, 0, 0);
+		    return providerLocationService.providersNearCustomer(customerAddress, itemsPerPage, distance);
 		}
 		return null;
 	}

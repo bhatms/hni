@@ -73,6 +73,9 @@ public class DefaultOrderProcessor implements OrderProcessor {
     public static String REPLY_INVALID_INPUT = "Invalid input! ";
     public static String REPLY_EXCEPTION_REGISTER_FIRST = "You will need to reply with REGISTER to sign up first.";
     public static String REPLY_MAX_ORDERS_REACHED = "You've reached the maximum number of orders for today. Please come back tomorrow.";
+    
+    public static int ITEMS_PER_PAGE = 3;
+    public static double DISTANCE_IN_MILES =10;
 
     @Inject
     private UserDAO userDao;
@@ -167,7 +170,7 @@ public class DefaultOrderProcessor implements OrderProcessor {
             // ### TODO: The last two arguments are no-ops right now. These are place holders for when the efficient geo-search
             // ### algorithm is brought back into play.
             // Github issue #58 - https://github.com/hungernotimpossible/hni/issues/58
-            Collection<ProviderLocation> nearbyProviders = locationService.providersNearCustomer(addressString, 3, 0, 0);
+            Collection<ProviderLocation> nearbyProviders = locationService.providersNearCustomer(addressString, ITEMS_PER_PAGE,DISTANCE_IN_MILES);
             if (!nearbyProviders.isEmpty()) {
                 order.setAddress(addressString);
                 List<ProviderLocation> nearbyWithMenu = new ArrayList<>();

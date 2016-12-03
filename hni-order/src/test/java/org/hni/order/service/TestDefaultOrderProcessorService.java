@@ -156,7 +156,7 @@ public class TestDefaultOrderProcessorService {
         partialOrder.setTransactionPhase(TransactionPhase.PROVIDING_ADDRESS);
 
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble(), Mockito.anyDouble()))
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()))
                 .thenReturn(providerLocationList);
 
         // Execute
@@ -181,7 +181,7 @@ public class TestDefaultOrderProcessorService {
         partialOrder.setTransactionPhase(TransactionPhase.PROVIDING_ADDRESS);
 
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble(), Mockito.anyDouble()))
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()))
                 .thenThrow(new GeoCodingException("Unable to resolve address"));
 
         // Execute
@@ -304,8 +304,9 @@ public class TestDefaultOrderProcessorService {
         partialOrder.getMenuItemsSelected().add(menuItems.get(0));
 
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble(), Mockito.anyDouble()))
-                .thenReturn(providerLocationList);
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()))
+            .thenReturn(providerLocationList);
+                    
         Date orderDate = new Date();
         // Execute
         String output = orderProcessor.processMessage(user, message);
@@ -394,8 +395,7 @@ public class TestDefaultOrderProcessorService {
         activationCodes.add(new ActivationCode());
         Mockito.when(activationCodeService.getByUser(user)).thenReturn(activationCodes);
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()
-                , Mockito.anyDouble()))
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()))
                 .thenReturn(providerLocationList);
         Date orderDate = new Date();
         // Execute
@@ -421,7 +421,7 @@ public class TestDefaultOrderProcessorService {
         partialOrder.getMenuItemsSelected().add(menuItems.get(0));
 
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt()
                 , Mockito.anyDouble()))
                 .thenReturn(providerLocationList);
         Date orderDate = new Date();
@@ -448,8 +448,7 @@ public class TestDefaultOrderProcessorService {
         partialOrder.getMenuItemsSelected().add(menuItems.get(0));
 
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()
-                , Mockito.anyDouble()))
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()))
                 .thenReturn(providerLocationList);
         Date orderDate = new Date();
         // Execute
@@ -476,8 +475,7 @@ public class TestDefaultOrderProcessorService {
         partialOrder.getMenuItemsSelected().add(menuItems.get(0));
 
         Mockito.when(partialOrderDAO.byUser(user)).thenReturn(partialOrder);
-        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()
-                , Mockito.anyDouble()))
+        Mockito.when(providerLocationService.providersNearCustomer(Mockito.anyString(), Mockito.anyInt(), Mockito.anyDouble()))
                 .thenReturn(providerLocationList);
         Date orderDate = new Date();
         // Execute
