@@ -1,10 +1,8 @@
 package org.hni.provider.service;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hni.common.service.AbstractService;
 import org.hni.provider.dao.ProviderLocationDAO;
-import org.hni.provider.om.AddressException;
-import org.hni.provider.om.LocationQueryParams;
+import org.hni.provider.om.GeoCodingException;
 import org.hni.provider.om.Provider;
 import org.hni.provider.om.ProviderLocation;
 import org.hni.user.om.Address;
@@ -14,11 +12,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-
 import java.util.Collection;
+import java.util.Collections;
 
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+@Transactional(propagation = Propagation.REQUIRED)
 public class DefaultProviderLocationService extends AbstractService<ProviderLocation> implements ProviderLocationService {
 
 	private ProviderLocationDAO providerLocationDao;
@@ -38,41 +36,15 @@ public class DefaultProviderLocationService extends AbstractService<ProviderLoca
 	}
 
 	@Override
-    public Collection<ProviderLocation> providersNearCustomer(String customerAddress, int itemsPerPage, double maxDistance) {
+	public Collection<ProviderLocation> providersNearCustomer(String customerAddress, int itemsPerPage, double distance, double radius) {
 
-        if(!StringUtils.isBlank(customerAddress)) {
-            
-            Address addrpoint = geoCodingService.resolveAddress(customerAddress).orElse(null);
+		Address addrpoint = geoCodingService.resolveAddress(customerAddress).orElse(null);
 
-            if (addrpoint != null) {
-                LocationQueryParams locationQuery = transFormLocationToQueryObject(addrpoint, maxDistance, itemsPerPage);
-                return providerLocationDao.providersNearCustomer(locationQuery);
-            } else {
-                throw new AddressException("Unable to resolve address");
-            }
-            
-        } else {
-            throw new AddressException("Invalid address provided");
-        }
-	    
-    }
-	
-	/**
-	 * method takes latitude longitude of customer
-	 * find boundaries and create an object with all search parameters
-	 * @param addrpoint
-	 * @param distance
-	 * @param itemsCount number of results
-	 * @return
-	 */
-	protected LocationQueryParams transFormLocationToQueryObject(Address addrpoint, double distance, int itemsCount) {
-	    
-	    LocationQueryParams locationQueryParams = new LocationQueryParams();
-	    locationQueryParams.setMaxDistance(distance * 1.60934); //convert miles to km
-	    locationQueryParams.setResultCount(itemsCount);
-	    locationQueryParams.setCustomerLattitude(addrpoint.getLatitude());
-	    locationQueryParams.setCustomerLongitude(addrpoint.getLongitude());
-        return locationQueryParams;
+		if (addrpoint != null) {
+			return providerLocationDao.providersNearCustomer(addrpoint, itemsPerPage);
+		} else {
+			return Collections.emptyList();
+		}
 	}
 
 
