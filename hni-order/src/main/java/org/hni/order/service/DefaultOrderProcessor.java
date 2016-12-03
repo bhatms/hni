@@ -50,10 +50,10 @@ public class DefaultOrderProcessor implements OrderProcessor {
     public static String MSG_CONFIRM = "CONFIRM";
     public static String MSG_REDO = "REDO";
 
-	public static String REPLY_NOT_CURRENTLY_ORDERING = "You're not currently ordering, please respond with MEAL to place an order.";
+    public static String REPLY_NOT_CURRENTLY_ORDERING = "You're not currently ordering, please respond with MEAL to place an order.";
     public static String REPLY_ORDER_CANCELLED = "You've cancelled your order.";
     public static String REPLY_ORDER_GET_STARTED = "Yes! Let's get started to order a meal for you. ";
-	public static String REPLY_ORDER_REQUEST_ADDRESS = "Reply with your location (e.g. #3 Smith St. 72758) or ENDMEAL to quit";
+    public static String REPLY_ORDER_REQUEST_ADDRESS = "Reply with your location (e.g. #3 Smith St. 72758) or ENDMEAL to quit";
     public static String REPLY_PROVIDERS_UNAVAILABLE = "Providers currently unavailable. Reply with new location or try again later. Reply ENDMEAL to quit. ";
     public static String REPLY_NO_PROVIDERS = "There are no providers near your location. Reply with new location or ENDMEAL to quit.";
     // In this flow, user chooses meal here : Reply 1) Ham sandwich 2) Tacos 3) Chicken Salad
@@ -73,9 +73,6 @@ public class DefaultOrderProcessor implements OrderProcessor {
     public static String REPLY_INVALID_INPUT = "Invalid input! ";
     public static String REPLY_EXCEPTION_REGISTER_FIRST = "You will need to reply with REGISTER to sign up first.";
     public static String REPLY_MAX_ORDERS_REACHED = "You've reached the maximum number of orders for today. Please come back tomorrow.";
-    
-    public static int ITEMS_PER_PAGE = 3;
-    public static double DISTANCE_IN_MILES =10;
 
     @Inject
     private UserDAO userDao;
@@ -109,9 +106,9 @@ public class DefaultOrderProcessor implements OrderProcessor {
             return REPLY_NOT_CURRENTLY_ORDERING;
         } else if (order == null && !message.equalsIgnoreCase(MSG_STATUS)) {
 
-        	if (orderService.maxDailyOrdersReached(user)) {
-        		return REPLY_MAX_ORDERS_REACHED;
-        	}
+            if (orderService.maxDailyOrdersReached(user)) {
+                return REPLY_MAX_ORDERS_REACHED;
+            }
             order = new PartialOrder();
             order.setTransactionPhase(TransactionPhase.MEAL);
             order.setUser(user);
@@ -140,8 +137,8 @@ public class DefaultOrderProcessor implements OrderProcessor {
                 //this is chosen w/ provider for now
                 break;
             case MULTIPLE_ORDER:
-            	output = handleMultipleOrders(user, message, order);
-            	break;
+                output = handleMultipleOrders(user, message, order);
+                break;
             case CONFIRM_OR_REDO:
                 return confirmOrContinueOrder(message, order);
             default:
@@ -157,7 +154,7 @@ public class DefaultOrderProcessor implements OrderProcessor {
 
     private String requestingMeal(User user, String request, PartialOrder order) {
         if (request.equalsIgnoreCase(MSG_MEAL) || request.equalsIgnoreCase(MSG_ORDER)) {
-        	order.setTransactionPhase(TransactionPhase.PROVIDING_ADDRESS);
+            order.setTransactionPhase(TransactionPhase.PROVIDING_ADDRESS);
             return REPLY_ORDER_GET_STARTED + REPLY_ORDER_REQUEST_ADDRESS;
         } else {
             return REPLY_NO_UNDERSTAND;
@@ -170,7 +167,7 @@ public class DefaultOrderProcessor implements OrderProcessor {
             // ### TODO: The last two arguments are no-ops right now. These are place holders for when the efficient geo-search
             // ### algorithm is brought back into play.
             // Github issue #58 - https://github.com/hungernotimpossible/hni/issues/58
-            Collection<ProviderLocation> nearbyProviders = locationService.providersNearCustomer(addressString, ITEMS_PER_PAGE,DISTANCE_IN_MILES);
+            Collection<ProviderLocation> nearbyProviders = locationService.providersNearCustomer(addressString, 3, 10);
             if (!nearbyProviders.isEmpty()) {
                 order.setAddress(addressString);
                 List<ProviderLocation> nearbyWithMenu = new ArrayList<>();
@@ -222,8 +219,8 @@ public class DefaultOrderProcessor implements OrderProcessor {
                 output = String.format(REPLY_MULTIPLE_ORDERS, activationCodes.size());
             }
             else {
-	            order.setTransactionPhase(TransactionPhase.CONFIRM_OR_REDO);
-	            output = String.format(REPLY_CONFIRM_ORDER, chosenItem.getName(), location.getName());
+                order.setTransactionPhase(TransactionPhase.CONFIRM_OR_REDO);
+                output = String.format(REPLY_CONFIRM_ORDER, chosenItem.getName(), location.getName());
             }
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             output += REPLY_INVALID_INPUT;
@@ -233,41 +230,41 @@ public class DefaultOrderProcessor implements OrderProcessor {
     }
 
     private String handleMultipleOrders(User user, String message, PartialOrder order) {
-    	String output = "" ;
+        String output = "" ;
 
-    	int num;
-		try {
-			num = Integer.parseInt(message);
-		} catch (NumberFormatException e) {
-			// if they can't type in a valid number, set to ZERO and next phase is REDO
-			num = 0;
-		}
+        int num;
+        try {
+            num = Integer.parseInt(message);
+        } catch (NumberFormatException e) {
+            // if they can't type in a valid number, set to ZERO and next phase is REDO
+            num = 0;
+        }
 
-    	List<ActivationCode> activationCodes = activationCodeService.getByUser(user);
-    	logger.debug("# activationCodes=" + activationCodes.size());
-    	if (num <= 0) {
-			logger.info("Reset order choices for PartialOrder {} by user request", order.getId());
-			//clear out previous choices
-			output = findNearbyMeals(order.getAddress(), order);
-    	}
-    	else {
-    		if (num > activationCodes.size()) {
-	    		// Too many - order them the maximum and move on
-    			logger.debug("User requested more meals than they have. Req=" + num + " actual=" + activationCodes.size());
-	    		num = activationCodes.size();
-    		}
-	 		Collection<MenuItem> menuItems = order.getMenuItemsSelected();
-			MenuItem menuItem = menuItems.iterator().next();
+        List<ActivationCode> activationCodes = activationCodeService.getByUser(user);
+        logger.debug("# activationCodes=" + activationCodes.size());
+        if (num <= 0) {
+            logger.info("Reset order choices for PartialOrder {} by user request", order.getId());
+            //clear out previous choices
+            output = findNearbyMeals(order.getAddress(), order);
+        }
+        else {
+            if (num > activationCodes.size()) {
+                // Too many - order them the maximum and move on
+                logger.debug("User requested more meals than they have. Req=" + num + " actual=" + activationCodes.size());
+                num = activationCodes.size();
+            }
+            Collection<MenuItem> menuItems = order.getMenuItemsSelected();
+            MenuItem menuItem = menuItems.iterator().next();
 
-	 		for (int x=0; x < num-1; x++) {
-	 			logger.debug("Adding menuItem to partialOrder");
-				menuItems.add(menuItem);
-			}
-	 		// Set next phase to confirm order
-	 		order.setTransactionPhase(TransactionPhase.CONFIRM_OR_REDO);
-	 		output = String.format(REPLY_CONFIRM_ORDER, menuItem.getName(),order.getChosenProvider().getName());
-    	}
-		return output;
+            for (int x=0; x < num-1; x++) {
+                logger.debug("Adding menuItem to partialOrder");
+                menuItems.add(menuItem);
+            }
+            // Set next phase to confirm order
+            order.setTransactionPhase(TransactionPhase.CONFIRM_OR_REDO);
+            output = String.format(REPLY_CONFIRM_ORDER, menuItem.getName(),order.getChosenProvider().getName());
+        }
+        return output;
 
     }
     private String confirmOrContinueOrder(String message, PartialOrder order) {
@@ -291,7 +288,7 @@ public class DefaultOrderProcessor implements OrderProcessor {
                 partialOrderDAO.delete(order);
                 logger.info("Successfully created order {}", finalOrder.getId());
                 output = REPLY_ORDER_COMPLETE;
- 	    }
+        }
         else if (message.equalsIgnoreCase(MSG_REDO)) {
                  logger.info("Reset order choices for PartialOrder {} by user request", order.getId());
                 //clear out previous choices
@@ -333,8 +330,8 @@ public class DefaultOrderProcessor implements OrderProcessor {
      */
     private String providerLocationMenuOutput(PartialOrder order) {
 
-    	// Note: spaces are significant in the Strings below!
-    	String options = "";
+        // Note: spaces are significant in the Strings below!
+        String options = "";
 
         String meals = "";
         for (int i = 0; i < order.getProviderLocationsForSelection().size(); i ++) {
@@ -347,8 +344,8 @@ public class DefaultOrderProcessor implements OrderProcessor {
 
         // if there's more than 1 option remove the last number, space and comma and replace with or #
         if (options.length() > 1) {
-        	options = options.substring(0, options.length() - 3 );
-        	options += " or " + order.getProviderLocationsForSelection().size();
+            options = options.substring(0, options.length() - 3 );
+            options += " or " + order.getProviderLocationsForSelection().size();
         }
         return String.format(REPLY_ORDER_CHOICE, options) + meals;
     }
