@@ -38,31 +38,29 @@ public class DefaultProviderLocationDAO extends AbstractDAO<ProviderLocation> im
         try {
 
             String queryString = new StringBuilder(
-                            "SELECT pl.* FROM provider_locations pl " +
-                            " WHERE pl.address_id in " +
-                            " ( select new_addr.id from " +
-                            " (SELECT id, " +
-                            " ( acos(sin(:custLatRad) * sin(radians(latitude)) + " +
-                            " cos(:custLatRad) * cos(radians(latitude)) * cos(radians(longitude) - :custLongRad))   ) as distance" +
+                            "SELECT pl.* , temp_adr.distance" 
+                            + " FROM provider_locations pl JOIN " 
+
+                            + " ( select id ,"
+                            + " ( 6371 * acos( cos(radians(:custLatitude)) * cos(radians(latitude)) " 
+                            + " * cos(radians(longitude) - radians(:custLongitude)) " 
+                            + " + sin(radians(:custLatitude)) * sin(radians(latitude)) ) ) AS distance" 
                     
-                            " FROM addresses " +
-                            " WHERE (latitude >= :minLatDeg AND latitude <= :maxLatDeg) AND (longitude >= :minLongDeg " +
-                            (locationQuery.isMeridian180WithinDistance() ? "OR" : "AND") +
-                            " longitude <= :maxLongDeg) "  +
-                            " group by id having distance <= :dist order by distance" +
-                            "   )" +
-                            "  as new_addr )")
-                    .toString();
+                            + " FROM addresses " 
+                            + " WHERE (latitude < :custLatitude + 1 AND latitude > :custLatitude - 1) " 
+                            + " AND (longitude < :custLongitude + 1 AND  longitude > :custLongitude - 1) "  
+                            + " group by id having distance < :maxDistance )  temp_adr ON temp_adr.id = pl.address_id "
+                            + " ORDER   BY temp_adr.distance asc "
+                            + " LIMIT :resultCount")
+                        .toString();
+            
             
 
             Query q = em.createNativeQuery(queryString, ProviderLocation.class)
-                    .setParameter("minLatDeg", locationQuery.getMinLattitudeDeg())  //minLat;
-                    .setParameter("maxLatDeg", locationQuery.getMaxLattitudeDeg())  //maxLat 
-                    .setParameter("minLongDeg", locationQuery.getMinLongitudeDeg()) //minLong
-                    .setParameter("maxLongDeg", locationQuery.getMaxLongitudeDeg()) //maxLong
-                    .setParameter("custLatRad", locationQuery.getCustomerLattitudeRad())   
-                    .setParameter("custLongRad", locationQuery.getCustomerLongitudeRad())
-                    .setParameter("dist", locationQuery.getDistnaceByRadius());
+                    .setParameter("custLatitude", locationQuery.getCustomerLattitude())  
+                    .setParameter("custLongitude", locationQuery.getCustomerLongitude())  
+                    .setParameter("maxDistance", locationQuery.getMaxDistance())
+                    .setParameter("resultCount", locationQuery.getResultCount());
 
             return q.getResultList();
         } catch(NoResultException e) {

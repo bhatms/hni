@@ -76,35 +76,35 @@ public class TestProviderLocationService {
 	
 	@Test(expected = AddressException.class)
     public void testGetProviderLocationByCustomerAddr_nullAddress() {
-        providerLocationService.providersNearCustomer(null, 1, 10, 6371.01);
+        providerLocationService.providersNearCustomer(null, 1, 10);
         fail("Exception is expected");
     }
 	
 	@Test(expected = AddressException.class)
     public void testGetProviderLocationByCustomerAddr_emptyAddress() {
-        providerLocationService.providersNearCustomer("  ", 1, 10, 6371.01);
+        providerLocationService.providersNearCustomer("  ", 1, 10);
         fail("Exception is expected");
     }
 	
 	@Test(expected = AddressException.class)
     public void testGetProviderLocationByCustomerAddr_invalidAddress() {
-        providerLocationService.providersNearCustomer("not a good addres", 1, 10, 6371.01);
+        providerLocationService.providersNearCustomer("not a good addres", 1, 10);
         fail("Exception is expected");
     }
 
 	@Test
 	public void testGetProviderLocationByCustomerAddr() {
-		Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("bridle view way ohcolumbus", 1, 10, 6371.01);
+		Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("bridle view way ohcolumbus", 3, 10);
 		assertTrue(providerLocations.size() > 0);
 
-		providerLocations = providerLocationService.providersNearCustomer("reston town center reston va", 1, 10, 6371.01);
+		providerLocations = providerLocationService.providersNearCustomer("reston town center reston va", 1, 10);
 		assertTrue(providerLocations.size() > 0);
 	}
 	
 	
 	@Test
     public void testGetProviderLocationByCustomerAddr_found_in2miles() {
-        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("8914 Centreville Rd Manassas, VA", 1, 2, 6371.01);
+        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("8914 Centreville Rd Manassas, VA", 1, 2);
         assertTrue(providerLocations.size() > 0);
         
         ProviderLocation providerLoc = providerLocations.iterator().next();
@@ -114,14 +114,14 @@ public class TestProviderLocationService {
 	
 	@Test
     public void testGetProviderLocationByCustomerAddr_not_found_in2miles() {
-        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("10864 Sudley Manor Dr, Manassas, VA", 1, 2, 6371.01);
+        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("10864 Sudley Manor Dr, Manassas, VA", 1, 2);
         assertTrue(providerLocations.size() == 0);
 
     }
 	
 	@Test
     public void testGetProviderLocationByCustomerAddr_found_in10miles() {
-        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("10864 Sudley Manor Dr, Manassas, VA", 1, 10, 6371.01);
+        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("10864 Sudley Manor Dr, Manassas, VA", 1, 10);
         assertTrue(providerLocations.size() > 0);
         
         ProviderLocation providerLoc = providerLocations.iterator().next();
@@ -130,9 +130,10 @@ public class TestProviderLocationService {
 	
 	
 	@Test
-    public void testGetProviderLocationByCustomerAddr_found_multiple() {
+    public void testProviderLocation_testOrder() {
 	    // test out of multiple providers first one is nearest
-        Collection<ProviderLocation> providerLocations = providerLocationService.providersNearCustomer("bridle view way oh columbus", 1, 10, 6371.01);
+        Collection<ProviderLocation> providerLocations = providerLocationService
+                    .providersNearCustomer("bridle view way columbus ohio", 3, 10);
         assertTrue(providerLocations.size() > 0);
 
         //nearest
@@ -143,5 +144,32 @@ public class TestProviderLocationService {
         //NEXT
         providerLoc = itr.next();
         assertEquals("westerville", providerLoc.getAddress().getCity().toLowerCase());
+    }
+	
+	
+	@Test
+    public void testProviderLocation_testOrder1() {
+        // test out of multiple providers first one is nearest
+        Collection<ProviderLocation> providerLocations = providerLocationService.
+                    providersNearCustomer("126 S State St, Westerville, OH 43081", 3, 10);
+        assertTrue(providerLocations.size() > 0);
+
+        //nearest
+        Iterator<ProviderLocation> itr = providerLocations.iterator();
+        ProviderLocation providerLoc = itr.next();
+        assertEquals("westerville", providerLoc.getAddress().getCity().toLowerCase());
+        
+        //NEXT
+        providerLoc = itr.next();
+        assertEquals("columbus", providerLoc.getAddress().getCity().toLowerCase());
+        
+    }
+	
+	
+	@Test
+    public void testGetProviderLocationByCustomerAddr_found_in250miles_testlimit() {
+        Collection<ProviderLocation> providerLocations = providerLocationService
+                    .providersNearCustomer("10864 Sudley Manor Dr, Manassas, VA", 2, 250);
+        assertEquals(2, providerLocations.size());
     }
 }

@@ -88,9 +88,6 @@ public class DefaultOrderProcessor implements OrderProcessor {
     @Inject
     private EventRouter eventRouter;
     
-    // TODO: @Value("${address.search.radius}")
-    private static final double RADIUS = 6371.01;
-    
     // TODO: @Value("${address.search.distance}")
     private static final double DISTANCE_IN_MILES = 10.0;
     
@@ -168,7 +165,7 @@ public class DefaultOrderProcessor implements OrderProcessor {
         String output = "";
         try {
             List<ProviderLocation> nearbyProviders = (ArrayList<ProviderLocation>) locationService.providersNearCustomer(addressString, 
-                    ITEMS_PER_PAGE, DISTANCE_IN_MILES, RADIUS);
+                    ITEMS_PER_PAGE, DISTANCE_IN_MILES);
             if (!nearbyProviders.isEmpty()) {
                 order.setAddress(addressString);
                 List<ProviderLocation> nearbyWithMenu = new ArrayList<>();

@@ -38,15 +38,14 @@ public class DefaultProviderLocationService extends AbstractService<ProviderLoca
 	}
 
 	@Override
-    public Collection<ProviderLocation> providersNearCustomer(String customerAddress, int itemsPerPage, double distance
-            , double radius) {
+    public Collection<ProviderLocation> providersNearCustomer(String customerAddress, int itemsPerPage, double maxDistance) {
 
         if(!StringUtils.isBlank(customerAddress)) {
             
             Address addrpoint = geoCodingService.resolveAddress(customerAddress).orElse(null);
 
             if (addrpoint != null) {
-                LocationQueryParams locationQuery = transFormLocationToQueryObject(addrpoint, radius, (distance * 1.60934));
+                LocationQueryParams locationQuery = transFormLocationToQueryObject(addrpoint, maxDistance, itemsPerPage);
                 return providerLocationDao.providersNearCustomer(locationQuery);
             } else {
                 throw new AddressException("Unable to resolve address");
@@ -62,40 +61,17 @@ public class DefaultProviderLocationService extends AbstractService<ProviderLoca
 	 * method takes latitude longitude of customer
 	 * find boundaries and create an object with all search parameters
 	 * @param addrpoint
-	 * @param radius
 	 * @param distance
+	 * @param itemsCount number of results
 	 * @return
 	 */
-	protected LocationQueryParams transFormLocationToQueryObject(Address addrpoint, double radius, double distance) {
-	    
-	    
-	    GeoLocation customerLocation = GeoLocation.fromDegrees(new Double(addrpoint.getLatitude()), new Double(addrpoint.getLongitude()));
-
-        GeoLocation[] boundingCoordinates = customerLocation.boundingCoordinates(distance, radius);
+	protected LocationQueryParams transFormLocationToQueryObject(Address addrpoint, double distance, int itemsCount) {
 	    
 	    LocationQueryParams locationQueryParams = new LocationQueryParams();
-	    
-	    locationQueryParams.setCustomerLattitudeRad(customerLocation.getLatitudeInRadians());
-	    locationQueryParams.setCustomerLongitudeRad(customerLocation.getLongitudeInRadians());
-	    
-	    locationQueryParams.setMinLattitudeDeg(boundingCoordinates[0].getLatitudeInDegrees());
-	    locationQueryParams.setMinLattitudeRad(boundingCoordinates[0].getLatitudeInRadians());
-	    
-	    locationQueryParams.setMinLongitudeDeg(boundingCoordinates[0].getLongitudeInDegrees());
-        locationQueryParams.setMinLongitudeRad(boundingCoordinates[0].getLongitudeInRadians());
-	    
-	    
-        locationQueryParams.setMaxLattitudeDeg(boundingCoordinates[1].getLatitudeInDegrees());
-        locationQueryParams.setMaxLattitudeRad(boundingCoordinates[1].getLatitudeInRadians());
-        
-        locationQueryParams.setMaxLongitudeDeg(boundingCoordinates[1].getLongitudeInDegrees());
-        locationQueryParams.setMaxLongitudeRad(boundingCoordinates[1].getLongitudeInRadians());
-        
-        locationQueryParams.setMeridian180WithinDistance(boundingCoordinates[0].getLongitudeInRadians() > 
-            boundingCoordinates[1].getLongitudeInRadians());
-        
-        locationQueryParams.setDistnaceByRadius(distance / radius);
-	    
+	    locationQueryParams.setMaxDistance(distance * 1.60934); //convert miles to km
+	    locationQueryParams.setResultCount(itemsCount);
+	    locationQueryParams.setCustomerLattitude(addrpoint.getLatitude());
+	    locationQueryParams.setCustomerLongitude(addrpoint.getLongitude());
         return locationQueryParams;
 	}
 

@@ -145,10 +145,9 @@ public class ProviderController extends AbstractBaseController {
 			@NotNull @QueryParam("address") String customerAddress,
 			@DefaultValue("1") @QueryParam("itemsPerPage") int itemsPerPage,
 			@DefaultValue("1") @QueryParam("pageNumber") int pageNum,
-			@DefaultValue("10") @QueryParam("distance") double distance,
-			@DefaultValue("6371.01") @QueryParam("radius") double radius) {
+			@DefaultValue("10") @QueryParam("distance") double distance) {
 		if (!StringUtils.isBlank(customerAddress)) {
-			return providerLocationService.providersNearCustomer(customerAddress, itemsPerPage, distance, radius);
+			return providerLocationService.providersNearCustomer(customerAddress, itemsPerPage, distance);
 		}
 		return null;
 	}
